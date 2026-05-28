@@ -50,8 +50,10 @@ func _gui_input(event: InputEvent) -> void:
 func _ensure_nodes() -> void:
 	if content != null:
 		return
+	set_process(true)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var margin := MarginContainer.new()
+	margin.mouse_filter = Control.MOUSE_FILTER_PASS
 	margin.add_theme_constant_override("margin_left", 10)
 	margin.add_theme_constant_override("margin_right", 10)
 	margin.add_theme_constant_override("margin_top", 8)
@@ -59,6 +61,7 @@ func _ensure_nodes() -> void:
 	add_child(margin)
 
 	content = VBoxContainer.new()
+	content.mouse_filter = Control.MOUSE_FILTER_PASS
 	content.add_theme_constant_override("separation", 5)
 	margin.add_child(content)
 
@@ -70,6 +73,7 @@ func _ensure_nodes() -> void:
 	tags_label = _make_label(11, false)
 	tags_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	option_container = VBoxContainer.new()
+	option_container.mouse_filter = Control.MOUSE_FILTER_PASS
 	option_container.add_theme_constant_override("separation", 4)
 	feedback_label = _make_label(11, false)
 	feedback_label.add_theme_color_override("font_color", Color(1.0, 0.75, 0.55))
@@ -113,6 +117,7 @@ func _render_draft_options() -> void:
 		option_row.gui_input.connect(_on_option_gui_input.bind(str(option.get("id", ""))))
 
 		var margin := MarginContainer.new()
+		margin.mouse_filter = Control.MOUSE_FILTER_PASS
 		margin.add_theme_constant_override("margin_left", 8)
 		margin.add_theme_constant_override("margin_right", 8)
 		margin.add_theme_constant_override("margin_top", 4)
@@ -132,7 +137,7 @@ func _handle_pointer_event(event: InputEvent, option_id: String) -> void:
 		if event.pressed:
 			pointer_down = true
 			pointer_dragging = false
-			pointer_start_global = get_viewport().get_mouse_position()
+			pointer_start_global = _event_mouse_position(event)
 			pointer_last_global = pointer_start_global
 			pointer_option_id = option_id
 			emit_signal("pan_started")
@@ -146,18 +151,40 @@ func _handle_pointer_event(event: InputEvent, option_id: String) -> void:
 			pointer_dragging = false
 			pointer_option_id = ""
 	elif event is InputEventMouseMotion and pointer_down:
-		var current_global := get_viewport().get_mouse_position()
-		var total_delta := current_global - pointer_start_global
-		var frame_delta := current_global - pointer_last_global
-		if pointer_dragging or total_delta.length() >= DRAG_THRESHOLD:
-			pointer_dragging = true
-			if not frame_delta.is_zero_approx():
-				emit_signal("pan_dragged", frame_delta)
-		pointer_last_global = current_global
+		_track_pointer_motion(_event_mouse_position(event))
+
+
+func _process(_delta: float) -> void:
+	if not pointer_down:
+		return
+	if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		pointer_down = false
+		pointer_dragging = false
+		pointer_option_id = ""
+		return
+	_track_pointer_motion(get_viewport().get_mouse_position())
+
+
+func _track_pointer_motion(current_global: Vector2) -> void:
+	var total_delta := current_global - pointer_start_global
+	var frame_delta := current_global - pointer_last_global
+	if pointer_dragging or total_delta.length() >= DRAG_THRESHOLD:
+		pointer_dragging = true
+		if not frame_delta.is_zero_approx():
+			emit_signal("pan_dragged", frame_delta)
+	pointer_last_global = current_global
 
 
 func _on_option_gui_input(event: InputEvent, card_id: String) -> void:
 	_handle_pointer_event(event, card_id)
+
+
+func _event_mouse_position(event: InputEvent) -> Vector2:
+	if event is InputEventMouseButton:
+		return event.global_position
+	if event is InputEventMouseMotion:
+		return event.global_position
+	return get_viewport().get_mouse_position()
 
 
 func _slot_feedback() -> String:
@@ -186,6 +213,7 @@ func _make_label(font_size: int, bold: bool) -> Label:
 	label.add_theme_font_size_override("font_size", font_size)
 	label.add_theme_color_override("font_color", Color(1, 1, 1) if bold else Color(0.86, 0.9, 0.94))
 	label.clip_text = false
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return label
 
 

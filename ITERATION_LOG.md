@@ -446,3 +446,42 @@
 ### Next Step
 
 - Relaunch the visible Godot window and manually test board navigation.
+
+## 2026-05-28 19:20:54 +08:00 - Board Navigation Test-Fix Loop
+
+### Completed Work
+
+- Added `tools/board_scroll_test.gd` to instantiate `BoardView` at a constrained size and verify scroll range plus scroll movement.
+- Reproduced a failing path in the new test: dragging from a candidate row did not move board content.
+- Fixed board input to use mouse event coordinates, `get_global_rect()`, mouse-wheel handling, and process-loop drag tracking.
+- Added visible `^` and `v` scroll controls in the board header as a reliable fallback.
+- Added slot-level process-loop drag tracking so dragging that begins on candidate rows can keep scrolling after the pointer leaves the row.
+- Kept candidate click selection intact by preserving the click-vs-drag threshold.
+- Added localized tooltips for board scroll controls.
+
+### Files Changed
+
+- `scripts/ui/board_view.gd`
+- `scripts/ui/card_slot.gd`
+- `data/ui_text.json`
+- `tools/board_scroll_test.gd`
+- `TODO.md`
+- `TEST_PLAN.md`
+- `ITERATION_LOG.md`
+
+### Validation Performed
+
+- `tools/board_scroll_test.gd` failed first on candidate-row drag, then passed after the fix with `BOARD_SCROLL_TEST_OK max_scroll=669 final_scroll=140`.
+- JSON validation passed for `data/cards.json`, `data/ui_text.json`, and `data/rules.json`.
+- `godot4 --headless --path . --quit` passed.
+- `godot4 --headless --path . --quit-after 2` passed.
+- `godot4 --headless --path . --script tools/smoke_test.gd` passed with `SMOKE_TEST_OK stage=3 funds=78 trust=61 hand=2`.
+- `godot4 --headless --path . --script tools/board_scroll_test.gd` passed.
+
+### Known Issues
+
+- Visible manual confirmation is still needed on the user's running desktop window because headless tests cannot judge input feel.
+
+### Next Step
+
+- Commit, push, relaunch the visible Godot window, and manually test dragging on slots and candidate rows.

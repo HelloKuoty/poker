@@ -14,6 +14,8 @@ const KEY_STEP := 260
 
 var localization: LocalizationManager
 var title_label: Label
+var scroll_up_button: Button
+var scroll_down_button: Button
 var scroll: ScrollContainer
 var grid: GridContainer
 var drag_candidate := false
@@ -32,6 +34,7 @@ func render(slots: Dictionary, draft_options: Dictionary, selected_card_type: St
 	localization = loc
 	_ensure_nodes()
 	title_label.text = localization.get_ui_text("board")
+	_update_scroll_button_text()
 	_clear_slots()
 	for slot_type in REQUIRED_SLOTS:
 		var slot: CardSlot = SLOT_SCENE.instantiate()
@@ -46,7 +49,8 @@ func render(slots: Dictionary, draft_options: Dictionary, selected_card_type: St
 func _input(event: InputEvent) -> void:
 	if scroll == null:
 		return
-	if event is InputEventMouseButton and event.pressed and _is_mouse_over_board():
+	var mouse_position := _event_mouse_position(event)
+	if event is InputEventMouseButton and event.pressed and _is_position_over_board(mouse_position):
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
 			_scroll_by(-WHEEL_STEP)
 			get_viewport().set_input_as_handled()
@@ -56,10 +60,10 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		if event.pressed and _is_mouse_over_board():
+		if event.pressed and _is_position_over_board(mouse_position):
 			drag_candidate = true
 			dragging = false
-			drag_start_mouse = get_viewport().get_mouse_position()
+			drag_start_mouse = mouse_position
 			drag_start_vertical = scroll.scroll_vertical
 			drag_start_horizontal = scroll.scroll_horizontal
 		elif drag_candidate:
@@ -68,13 +72,7 @@ func _input(event: InputEvent) -> void:
 			drag_candidate = false
 			dragging = false
 	if event is InputEventMouseMotion and drag_candidate:
-		var current_mouse := get_viewport().get_mouse_position()
-		var delta := current_mouse - drag_start_mouse
-		if dragging or abs(delta.y) > 6.0 or abs(delta.x) > 6.0:
-			dragging = true
-			scroll.scroll_vertical = max(0, drag_start_vertical - int(delta.y))
-			scroll.scroll_horizontal = max(0, drag_start_horizontal - int(delta.x))
-			get_viewport().set_input_as_handled()
+		_apply_drag_to(mouse_position)
 	if event is InputEventKey and event.pressed:
 		if event.keycode == KEY_PAGEUP:
 			_scroll_by(-KEY_STEP)
@@ -84,9 +82,21 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 
+func _process(_delta: float) -> void:
+	if not drag_candidate:
+		return
+	if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		drag_candidate = false
+		dragging = false
+		return
+	_apply_drag_to(get_viewport().get_mouse_position())
+
+
 func _ensure_nodes() -> void:
 	if grid != null:
 		return
+	set_process(true)
+	mouse_filter = Control.MOUSE_FILTER_STOP
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.06, 0.075, 0.085)
 	style.border_color = Color(0.2, 0.26, 0.3)
@@ -110,10 +120,24 @@ func _ensure_nodes() -> void:
 	root.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	margin.add_child(root)
 
+	var title_row := HBoxContainer.new()
+	title_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title_row.add_theme_constant_override("separation", 6)
+	root.add_child(title_row)
+
 	title_label = Label.new()
 	title_label.add_theme_font_size_override("font_size", 20)
 	title_label.add_theme_color_override("font_color", Color.WHITE)
-	root.add_child(title_label)
+	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title_row.add_child(title_label)
+
+	scroll_up_button = _make_scroll_button("^")
+	scroll_up_button.pressed.connect(_scroll_by.bind(-KEY_STEP))
+	title_row.add_child(scroll_up_button)
+
+	scroll_down_button = _make_scroll_button("v")
+	scroll_down_button.pressed.connect(_scroll_by.bind(KEY_STEP))
+	title_row.add_child(scroll_down_button)
 
 	scroll = ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -146,19 +170,61 @@ func _on_draft_option_clicked(slot_type: String, card_id: String) -> void:
 
 
 func _on_slot_pan_started() -> void:
-	drag_candidate = false
-	dragging = false
+	pass
 
 
 func _on_slot_pan_dragged(delta: Vector2) -> void:
+	if drag_candidate or dragging:
+		return
 	_scroll_by(-int(delta.y))
 
 
 func _scroll_by(amount: int) -> void:
-	scroll.scroll_vertical = max(0, scroll.scroll_vertical + amount)
+	if scroll == null:
+		return
+	scroll.scroll_vertical = clampi(scroll.scroll_vertical + amount, 0, _max_vertical_scroll())
 
 
-func _is_mouse_over_board() -> bool:
-	var mouse_position := get_viewport().get_mouse_position()
-	var rect := Rect2(global_position, size)
-	return rect.has_point(mouse_position)
+func _apply_drag_to(current_mouse: Vector2) -> void:
+	var delta := current_mouse - drag_start_mouse
+	if dragging or abs(delta.y) > 6.0 or abs(delta.x) > 6.0:
+		dragging = true
+		scroll.scroll_vertical = clampi(drag_start_vertical - int(delta.y), 0, _max_vertical_scroll())
+		scroll.scroll_horizontal = max(0, drag_start_horizontal - int(delta.x))
+		get_viewport().set_input_as_handled()
+
+
+func _max_vertical_scroll() -> int:
+	if scroll == null:
+		return 0
+	var bar := scroll.get_v_scroll_bar()
+	if bar == null:
+		return 0
+	return max(0, int(ceil(bar.max_value - bar.page)))
+
+
+func _make_scroll_button(label_text: String) -> Button:
+	var button := Button.new()
+	button.text = label_text
+	button.custom_minimum_size = Vector2(34, 30)
+	button.focus_mode = Control.FOCUS_NONE
+	return button
+
+
+func _update_scroll_button_text() -> void:
+	if scroll_up_button == null or scroll_down_button == null:
+		return
+	scroll_up_button.tooltip_text = localization.get_ui_text("scroll_up") if localization != null else ""
+	scroll_down_button.tooltip_text = localization.get_ui_text("scroll_down") if localization != null else ""
+
+
+func _event_mouse_position(event: InputEvent) -> Vector2:
+	if event is InputEventMouseButton:
+		return event.position
+	if event is InputEventMouseMotion:
+		return event.position
+	return get_viewport().get_mouse_position()
+
+
+func _is_position_over_board(mouse_position: Vector2) -> bool:
+	return get_global_rect().has_point(mouse_position)

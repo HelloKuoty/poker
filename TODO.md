@@ -2,7 +2,7 @@
 
 ## Current Goal
 
-Fix business board navigation so the player can drag inside board slots and candidate rows, use the mouse wheel, and use keyboard paging to reach hidden canvas content.
+Enter a test-fix-test loop for the unresolved business board navigation bug until hidden canvas content can be reached by drag, wheel, keyboard, and visible scroll controls.
 
 ## Completed This Iteration
 
