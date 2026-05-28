@@ -65,6 +65,7 @@ func _ensure_nodes() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var margin := MarginContainer.new()
 	margin.mouse_filter = Control.MOUSE_FILTER_PASS
+	margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	margin.add_theme_constant_override("margin_left", 10)
 	margin.add_theme_constant_override("margin_right", 10)
 	margin.add_theme_constant_override("margin_top", 8)
@@ -73,6 +74,7 @@ func _ensure_nodes() -> void:
 
 	content = VBoxContainer.new()
 	content.mouse_filter = Control.MOUSE_FILTER_PASS
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	content.add_theme_constant_override("separation", 5)
 	margin.add_child(content)
 
@@ -129,6 +131,7 @@ func _render_draft_options() -> void:
 
 		var margin := MarginContainer.new()
 		margin.mouse_filter = Control.MOUSE_FILTER_PASS
+		margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		margin.add_theme_constant_override("margin_left", 8)
 		margin.add_theme_constant_override("margin_right", 8)
 		margin.add_theme_constant_override("margin_top", 4)
@@ -228,6 +231,7 @@ func _apply_style() -> void:
 
 func _make_label(font_size: int, bold: bool) -> Label:
 	var label := Label.new()
+	label.custom_minimum_size = Vector2(0, 0)
 	label.add_theme_font_size_override("font_size", font_size)
 	label.add_theme_color_override("font_color", Color(1, 1, 1) if bold else Color(0.86, 0.9, 0.94))
 	label.clip_text = true

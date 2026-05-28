@@ -140,7 +140,7 @@ func _ensure_nodes() -> void:
 	root.add_child(scroll)
 
 	grid = GridContainer.new()
-	grid.columns = 3
+	grid.columns = 4
 	grid.add_theme_constant_override("h_separation", 10)
 	grid.add_theme_constant_override("v_separation", 10)
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL

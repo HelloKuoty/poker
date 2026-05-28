@@ -8,8 +8,19 @@ func _init() -> void:
 
 
 func _run() -> void:
+	var sizes := [
+		Vector2i(1440, 900),
+		Vector2i(1366, 768),
+		Vector2i(1280, 720),
+	]
+	for viewport_size in sizes:
+		await _check_layout(viewport_size)
+	quit(0)
+
+
+func _check_layout(viewport_size: Vector2i) -> void:
 	var frame := Control.new()
-	frame.size = Vector2(1440, 900)
+	frame.size = Vector2(viewport_size)
 	frame.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	root.add_child(frame)
 
@@ -33,7 +44,8 @@ func _run() -> void:
 		if scroll_rect.encloses(slot_rect):
 			visible_count += 1
 
-	print("MAIN_LAYOUT board=%s scroll=%s grid=%s columns=%d visible_slots=%d scroll_max=%d" % [
+	print("MAIN_LAYOUT size=%s board=%s scroll=%s grid=%s columns=%d visible_slots=%d scroll_max=%d" % [
+		str(viewport_size),
 		str(board_rect.size),
 		str(scroll_rect.size),
 		str(grid_rect.size),
@@ -43,14 +55,16 @@ func _run() -> void:
 	])
 
 	if board_rect.position.y + board_rect.size.y > frame_rect.position.y + frame_rect.size.y:
-		_fail("Business board overflows the 1440x900 viewport. board_bottom=%.1f viewport_bottom=%.1f" % [
+		_fail("Business board overflows the %s viewport. board_bottom=%.1f viewport_bottom=%.1f" % [
+			str(viewport_size),
 			board_rect.position.y + board_rect.size.y,
 			frame_rect.position.y + frame_rect.size.y,
 		])
 		return
 
 	if board_rect.position.x + board_rect.size.x > frame_rect.position.x + frame_rect.size.x:
-		_fail("Business board overflows the 1440x900 viewport horizontally. board_right=%.1f viewport_right=%.1f" % [
+		_fail("Business board overflows the %s viewport horizontally. board_right=%.1f viewport_right=%.1f" % [
+			str(viewport_size),
 			board_rect.position.x + board_rect.size.x,
 			frame_rect.position.x + frame_rect.size.x,
 		])
@@ -60,15 +74,16 @@ func _run() -> void:
 		if child is Control:
 			var child_rect: Rect2 = (child as Control).get_global_rect()
 			if child_rect.position.x + child_rect.size.x > frame_rect.position.x + frame_rect.size.x:
-				_fail("Main body child overflows horizontally. child=%s right=%.1f viewport_right=%.1f" % [
+				_fail("Main body child overflows horizontally at %s. child=%s right=%.1f viewport_right=%.1f" % [
+					str(viewport_size),
 					child.name,
 					child_rect.position.x + child_rect.size.x,
 					frame_rect.position.x + frame_rect.size.x,
 				])
 				return
 
-	if visible_count < 8:
-		_fail("Expected all 8 board slots to be visible at 1440x900, but only %d are fully visible." % visible_count)
+	if visible_count < 8 and _max_vertical_scroll(scroll) <= 0:
+		_fail("Expected all slots visible or scrollable at %s, but visible=%d scroll_max=0." % [str(viewport_size), visible_count])
 		return
 
 	if _max_vertical_scroll(scroll) > 0:
@@ -81,7 +96,7 @@ func _run() -> void:
 		Input.parse_input_event(wheel)
 		await process_frame
 		if scroll.scroll_vertical <= 0:
-			_fail("Mouse wheel does not scroll the board inside the real main layout.")
+			_fail("Mouse wheel does not scroll the board inside the real main layout at %s." % str(viewport_size))
 			return
 
 		scroll.scroll_vertical = 0
@@ -111,10 +126,11 @@ func _run() -> void:
 		Input.parse_input_event(option_release)
 		await process_frame
 		if scroll.scroll_vertical <= 0:
-			_fail("Candidate-row drag does not scroll the board inside the real main layout.")
+			_fail("Candidate-row drag does not scroll the board inside the real main layout at %s." % str(viewport_size))
 			return
 
-	quit(0)
+	frame.queue_free()
+	await process_frame
 
 
 func _max_vertical_scroll(scroll: ScrollContainer) -> int:

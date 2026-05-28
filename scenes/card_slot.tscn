@@ -3,5 +3,5 @@
 [ext_resource type="Script" path="res://scripts/ui/card_slot.gd" id="1_card_slot"]
 
 [node name="CardSlot" type="PanelContainer"]
-custom_minimum_size = Vector2(270, 185)
+custom_minimum_size = Vector2(180, 185)
 script = ExtResource("1_card_slot")

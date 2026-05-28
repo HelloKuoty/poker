@@ -13,8 +13,8 @@ func _run() -> void:
 	root.size = Vector2i(900, 700)
 	var loc: LocalizationManager = LocalizationManager.new()
 	var board: BoardView = BoardView.new()
-	board.custom_minimum_size = Vector2(760, 520)
-	board.size = Vector2(760, 520)
+	board.custom_minimum_size = Vector2(760, 360)
+	board.size = Vector2(760, 360)
 	root.add_child(board)
 	board.setup(loc)
 	board.render({}, _draft_options(), "", loc, _type_colors())
@@ -23,7 +23,7 @@ func _run() -> void:
 
 	var scroll: ScrollContainer = board.scroll
 	var max_scroll := _max_vertical_scroll(scroll)
-	if max_scroll <= 0:
+	if max_scroll < 80:
 		_fail("Board has no vertical scroll range. max_scroll=%d board=%s scroll=%s grid=%s grid_min=%s" % [
 			max_scroll,
 			str(board.size),

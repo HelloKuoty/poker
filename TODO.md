@@ -22,8 +22,8 @@ Enter a test-fix-test loop for the unresolved business board navigation bug unti
 ## Current Iteration
 
 - Fix the unresolved business board navigation bug with a test-fix-test loop.
-- Keep the main scene within a 1440x900 viewport.
-- Show all 8 business board slots at once using a 3-column board layout.
+- Keep the main scene within 1440x900, 1366x768, and 1280x720 viewports.
+- Show all 8 business board slots at once using a compact 4-column board layout.
 - Keep right-side score/summary/detail panels scrollable without stretching the whole app.
 - Preserve fallback scrolling for constrained board sizes.
 
@@ -31,7 +31,7 @@ Enter a test-fix-test loop for the unresolved business board navigation bug unti
 
 - Run the project in a visible Godot window after the layout fix.
 - Manually confirm all 8 board slots are visible at launch.
-- Manually confirm candidate selection still works in the denser 3-column layout.
+- Manually confirm candidate selection still works in the compact 4-column layout.
 - Tune resource balance and reward pacing.
 - Improve survival UI readability after manual playtest.
 - Tune draft reroll cost and candidate count.

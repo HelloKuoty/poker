@@ -527,3 +527,47 @@
 ### Next Step
 
 - Launch a fresh visible Godot window and manually verify that all 8 board slots are visible immediately.
+
+## 2026-05-28 19:34:46 +08:00 - Compact Board Multi-Size Fix
+
+### Completed Work
+
+- Extended `tools/main_layout_test.gd` from one viewport to three real desktop sizes: 1440x900, 1366x768, and 1280x720.
+- Reproduced the remaining bug at 1366x768: only 6 board slots were fully visible and mouse-wheel scrolling did not move the board inside the real main layout.
+- Switched the business board to 4 columns so all 8 model slots fit without depending on scrolling at common desktop sizes.
+- Reduced `scenes/card_slot.tscn` minimum slot width from 270px to 180px so the 4-column board can shrink inside the available width.
+- Kept label clipping and ellipsis behavior so compact slots do not force horizontal overflow.
+- Strengthened `tools/board_scroll_test.gd` to use a shorter constrained board height and require a meaningful scroll range.
+
+### Files Changed
+
+- `scenes/card_slot.tscn`
+- `scripts/ui/board_view.gd`
+- `scripts/ui/card_slot.gd`
+- `tools/board_scroll_test.gd`
+- `tools/main_layout_test.gd`
+- `TODO.md`
+- `TEST_PLAN.md`
+- `ITERATION_LOG.md`
+
+### Validation Performed
+
+- `tools/main_layout_test.gd` failed first at 1366x768 with `visible_slots=6 scroll_max=49`, then passed after the compact 4-column fix.
+- `tools/main_layout_test.gd` now passes for:
+  - 1440x900: `visible_slots=8 scroll_max=0`
+  - 1366x768: `visible_slots=8 scroll_max=0`
+  - 1280x720: `visible_slots=8 scroll_max=0`
+- `tools/board_scroll_test.gd` passed with `BOARD_SCROLL_TEST_OK max_scroll=161 final_scroll=140`.
+- JSON validation passed for `data/cards.json`, `data/ui_text.json`, and `data/rules.json`.
+- `godot4 --headless --path . --quit` passed.
+- `godot4 --headless --path . --quit-after 2` passed.
+- `godot4 --headless --path . --script tools/smoke_test.gd` passed with `SMOKE_TEST_OK stage=3 funds=84 trust=61 hand=2`.
+- `git diff --check` passed.
+
+### Known Issues
+
+- Compact slots use ellipsis for long candidate names; detailed descriptions remain available through tooltips and the detail panel.
+
+### Next Step
+
+- Relaunch the visible Godot window and manually verify that all 8 board slots are immediately visible.
