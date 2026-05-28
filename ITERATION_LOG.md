@@ -414,3 +414,35 @@
 ### Next Step
 
 - Test the board draft flow: choose slot options, reroll empty-slot options, score, advance stage, choose reward.
+
+## 2026-05-28 19:13:36 +08:00 - Board Slot Drag Fix
+
+### Completed Work
+
+- Reworked in-slot draft option controls so they no longer use `Button` event handling that blocks canvas drag.
+- Added slot-level drag forwarding to scroll the business board when dragging on slots or candidate rows.
+- Added mouse wheel scrolling over the board.
+- Added PageUp/PageDown keyboard scrolling fallback.
+- Kept normal click selection for slot candidates by distinguishing click from drag with a movement threshold.
+
+### Files Changed
+
+- `scripts/ui/card_slot.gd`
+- `scripts/ui/board_view.gd`
+- `TODO.md`
+- `ITERATION_LOG.md`
+
+### Validation Performed
+
+- JSON validation passed for `data/cards.json`, `data/ui_text.json`, and `data/rules.json`.
+- `godot4 --headless --path . --quit` passed.
+- `godot4 --headless --path . --quit-after 2` passed.
+- `godot4 --headless --path . --script tools/smoke_test.gd` passed with `SMOKE_TEST_OK stage=3 funds=95 trust=61 hand=2`.
+
+### Known Issues
+
+- Needs visible manual confirmation that drag feels correct across slot panels, candidate rows, and empty board space.
+
+### Next Step
+
+- Relaunch the visible Godot window and manually test board navigation.

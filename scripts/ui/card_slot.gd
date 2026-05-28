@@ -5,6 +5,8 @@ const LocalizationManager = preload("res://scripts/core/localization_manager.gd"
 
 signal slot_clicked(slot_type: String)
 signal draft_option_clicked(slot_type: String, card_id: String)
+signal pan_started
+signal pan_dragged(delta: Vector2)
 
 var slot_type := ""
 var card_data := {}
@@ -21,6 +23,13 @@ var desc_label: Label
 var tags_label: Label
 var option_container: VBoxContainer
 var feedback_label: Label
+var pointer_down := false
+var pointer_dragging := false
+var pointer_start_global := Vector2.ZERO
+var pointer_last_global := Vector2.ZERO
+var pointer_option_id := ""
+
+const DRAG_THRESHOLD := 7.0
 
 
 func setup(expected_type: String, placed_card: Dictionary, options: Array, loc: LocalizationManager, current_selected_type: String = "", colors: Dictionary = {}) -> void:
@@ -35,9 +44,7 @@ func setup(expected_type: String, placed_card: Dictionary, options: Array, loc: 
 
 
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		emit_signal("slot_clicked", slot_type)
-		accept_event()
+	_handle_pointer_event(event, "")
 
 
 func _ensure_nodes() -> void:
@@ -97,13 +104,60 @@ func _render() -> void:
 
 func _render_draft_options() -> void:
 	for option in draft_options:
-		var button := Button.new()
-		button.text = "%s  %s" % [localization.get_text(option.get("name", {})), _effects_summary(option)]
-		button.tooltip_text = localization.get_text(option.get("description", {}))
-		button.custom_minimum_size = Vector2(0, 30)
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.pressed.connect(_on_draft_option_pressed.bind(str(option.get("id", ""))))
-		option_container.add_child(button)
+		var option_row := PanelContainer.new()
+		option_row.tooltip_text = localization.get_text(option.get("description", {}))
+		option_row.custom_minimum_size = Vector2(0, 30)
+		option_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		option_row.mouse_filter = Control.MOUSE_FILTER_STOP
+		option_row.add_theme_stylebox_override("panel", _make_option_style())
+		option_row.gui_input.connect(_on_option_gui_input.bind(str(option.get("id", ""))))
+
+		var margin := MarginContainer.new()
+		margin.add_theme_constant_override("margin_left", 8)
+		margin.add_theme_constant_override("margin_right", 8)
+		margin.add_theme_constant_override("margin_top", 4)
+		margin.add_theme_constant_override("margin_bottom", 4)
+		option_row.add_child(margin)
+
+		var label := _make_label(14, true)
+		label.text = "%s  %s" % [localization.get_text(option.get("name", {})), _effects_summary(option)]
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		margin.add_child(label)
+		option_container.add_child(option_row)
+
+
+func _handle_pointer_event(event: InputEvent, option_id: String) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			pointer_down = true
+			pointer_dragging = false
+			pointer_start_global = get_viewport().get_mouse_position()
+			pointer_last_global = pointer_start_global
+			pointer_option_id = option_id
+			emit_signal("pan_started")
+		else:
+			if pointer_down and not pointer_dragging:
+				if pointer_option_id == "":
+					emit_signal("slot_clicked", slot_type)
+				else:
+					emit_signal("draft_option_clicked", slot_type, pointer_option_id)
+			pointer_down = false
+			pointer_dragging = false
+			pointer_option_id = ""
+	elif event is InputEventMouseMotion and pointer_down:
+		var current_global := get_viewport().get_mouse_position()
+		var total_delta := current_global - pointer_start_global
+		var frame_delta := current_global - pointer_last_global
+		if pointer_dragging or total_delta.length() >= DRAG_THRESHOLD:
+			pointer_dragging = true
+			if not frame_delta.is_zero_approx():
+				emit_signal("pan_dragged", frame_delta)
+		pointer_last_global = current_global
+
+
+func _on_option_gui_input(event: InputEvent, card_id: String) -> void:
+	_handle_pointer_event(event, card_id)
 
 
 func _slot_feedback() -> String:
@@ -135,6 +189,18 @@ func _make_label(font_size: int, bold: bool) -> Label:
 	return label
 
 
+func _make_option_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.08, 0.1, 0.12, 0.78)
+	style.border_color = Color(1, 1, 1, 0.08)
+	style.set_border_width_all(1)
+	style.corner_radius_top_left = 4
+	style.corner_radius_top_right = 4
+	style.corner_radius_bottom_left = 4
+	style.corner_radius_bottom_right = 4
+	return style
+
+
 func _effects_summary(card: Dictionary) -> String:
 	var effects: Dictionary = card.get("effects", {})
 	if effects.is_empty():
@@ -153,10 +219,6 @@ func _clear_options() -> void:
 	for child in option_container.get_children():
 		option_container.remove_child(child)
 		child.queue_free()
-
-
-func _on_draft_option_pressed(card_id: String) -> void:
-	emit_signal("draft_option_clicked", slot_type, card_id)
 
 
 func _join(values: Array, separator: String) -> String:

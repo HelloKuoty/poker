@@ -2,7 +2,7 @@
 
 ## Current Goal
 
-Fix business board navigation by adding visible scrollbars and mouse-drag panning.
+Fix business board navigation so the player can drag inside board slots and candidate rows, use the mouse wheel, and use keyboard paging to reach hidden canvas content.
 
 ## Completed This Iteration
 

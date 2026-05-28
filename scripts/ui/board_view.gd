@@ -9,6 +9,8 @@ signal draft_option_clicked(slot_type: String, card_id: String)
 
 const SLOT_SCENE := preload("res://scenes/card_slot.tscn")
 const REQUIRED_SLOTS := ["customer", "pain", "solution", "product", "channel", "revenue", "cost", "moat"]
+const WHEEL_STEP := 90
+const KEY_STEP := 260
 
 var localization: LocalizationManager
 var title_label: Label
@@ -37,11 +39,22 @@ func render(slots: Dictionary, draft_options: Dictionary, selected_card_type: St
 		slot.setup(slot_type, slots.get(slot_type, {}), draft_options.get(slot_type, []), localization, selected_card_type, type_colors)
 		slot.slot_clicked.connect(_on_slot_clicked)
 		slot.draft_option_clicked.connect(_on_draft_option_clicked)
+		slot.pan_started.connect(_on_slot_pan_started)
+		slot.pan_dragged.connect(_on_slot_pan_dragged)
 
 
 func _input(event: InputEvent) -> void:
 	if scroll == null:
 		return
+	if event is InputEventMouseButton and event.pressed and _is_mouse_over_board():
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			_scroll_by(-WHEEL_STEP)
+			get_viewport().set_input_as_handled()
+			return
+		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			_scroll_by(WHEEL_STEP)
+			get_viewport().set_input_as_handled()
+			return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed and _is_mouse_over_board():
 			drag_candidate = true
@@ -61,6 +74,13 @@ func _input(event: InputEvent) -> void:
 			dragging = true
 			scroll.scroll_vertical = max(0, drag_start_vertical - int(delta.y))
 			scroll.scroll_horizontal = max(0, drag_start_horizontal - int(delta.x))
+			get_viewport().set_input_as_handled()
+	if event is InputEventKey and event.pressed:
+		if event.keycode == KEY_PAGEUP:
+			_scroll_by(-KEY_STEP)
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_PAGEDOWN:
+			_scroll_by(KEY_STEP)
 			get_viewport().set_input_as_handled()
 
 
@@ -123,6 +143,19 @@ func _on_slot_clicked(slot_type: String) -> void:
 
 func _on_draft_option_clicked(slot_type: String, card_id: String) -> void:
 	emit_signal("draft_option_clicked", slot_type, card_id)
+
+
+func _on_slot_pan_started() -> void:
+	drag_candidate = false
+	dragging = false
+
+
+func _on_slot_pan_dragged(delta: Vector2) -> void:
+	_scroll_by(-int(delta.y))
+
+
+func _scroll_by(amount: int) -> void:
+	scroll.scroll_vertical = max(0, scroll.scroll_vertical + amount)
 
 
 func _is_mouse_over_board() -> bool:
