@@ -667,3 +667,39 @@
 ### Next Step
 
 - Commit, push, and launch a fresh visible Godot window.
+
+## 2026-05-28 19:48:18 +08:00 - Default Window Size Fix
+
+### Completed Work
+
+- Identified that `project.godot` still defaulted to a 1440x900 viewport even though manual launch commands used smaller resolution flags.
+- Changed the actual project default viewport to 900x700 so normal project runs open at a size already covered by layout tests.
+- Added `tools/project_config_test.gd` to fail if the default viewport grows beyond 960x700.
+- Updated manual test plan to check default 900x700 project settings explicitly.
+
+### Files Changed
+
+- `project.godot`
+- `tools/project_config_test.gd`
+- `TODO.md`
+- `TEST_PLAN.md`
+- `ITERATION_LOG.md`
+
+### Validation Performed
+
+- `godot4 --headless --path . --script tools/project_config_test.gd` passed with `PROJECT_CONFIG_TEST_OK viewport=900x700`.
+- JSON validation passed for `data/cards.json`, `data/ui_text.json`, and `data/rules.json`.
+- `godot4 --headless --path . --quit` passed.
+- `godot4 --headless --path . --quit-after 2` passed.
+- `godot4 --headless --path . --script tools/smoke_test.gd` passed with `SMOKE_TEST_OK stage=3 funds=79 trust=61 hand=2`.
+- `godot4 --headless --path . --script tools/board_scroll_test.gd` passed with `BOARD_SCROLL_TEST_OK max_scroll=99 final_scroll=99`.
+- `godot4 --headless --path . --script tools/main_layout_test.gd` passed down to 640x480 with `visible_slots=8 clickable_slots=8`.
+- `git diff --check` passed.
+
+### Known Issues
+
+- Existing already-open Godot windows may still show older layouts until closed.
+
+### Next Step
+
+- Commit, push, and launch a fresh visible Godot window using default project settings.

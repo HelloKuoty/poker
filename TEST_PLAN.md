@@ -4,19 +4,19 @@
 
 1. Open the project in Godot 4.x.
 2. Confirm `project.godot` opens and the main scene is `res://scenes/main.tscn`.
-3. Run the main scene.
-4. Confirm the default language is Chinese.
-5. Click `新游戏`.
-6. Confirm each empty core board slot directly shows up to 3 candidate cards.
-7. Confirm candidates are visually grouped inside their matching slot.
-8. Confirm all 8 business board slots are visible at the default 1440x900 project resolution.
-9. Resize or run at 1366x768 and confirm all 8 business board slots are still visible.
-10. Resize or run at 1280x720 and confirm all 8 business board slots are still visible.
-11. Resize or run at 1024x768 and confirm all 8 business board slots are still visible and clickable.
-12. Resize or run at 960x700 and confirm all 8 business board slots are still visible and clickable.
-13. Resize or run at 900x700 and confirm all 8 business board slots are still visible and clickable.
-14. Resize or run at 800x600 and confirm all 8 business board slots are still visible and clickable.
-15. Resize or run at 720x540 and confirm all 8 business board slots are still visible and clickable.
+3. Confirm the project default viewport is 900x700.
+4. Run the main scene using default project settings, without custom `--resolution`.
+5. Confirm the default language is Chinese.
+6. Click `新游戏`.
+7. Confirm each empty core board slot directly shows up to 3 candidate cards.
+8. Confirm candidates are visually grouped inside their matching slot.
+9. Confirm all 8 business board slots are visible at the default 900x700 project resolution.
+10. Resize or run at 1440x900 and confirm all 8 business board slots are still visible.
+11. Resize or run at 1366x768 and confirm all 8 business board slots are still visible.
+12. Resize or run at 1280x720 and confirm all 8 business board slots are still visible.
+13. Resize or run at 1024x768 and confirm all 8 business board slots are still visible and clickable.
+14. Resize or run at 960x700 and confirm all 8 business board slots are still visible and clickable.
+15. Resize or run at 800x600 and confirm all 8 business board slots are still visible and clickable.
 16. Resize or run at 640x480 and confirm all 8 business board slots are still visible and clickable.
 17. Confirm the top-level scrollbars can move the whole app if the OS/window chrome leaves less usable space.
 18. Confirm the right-side score/summary/detail column scrolls internally instead of pushing the board below the window.
@@ -62,3 +62,4 @@
 - `godot4 --headless --path . --script tools/smoke_test.gd` passed.
 - `godot4 --headless --path . --script tools/board_scroll_test.gd` passed.
 - `godot4 --headless --path . --script tools/main_layout_test.gd` passed.
+- `godot4 --headless --path . --script tools/project_config_test.gd` passed.
