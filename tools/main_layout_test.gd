@@ -15,6 +15,9 @@ func _run() -> void:
 		Vector2i(1024, 768),
 		Vector2i(960, 700),
 		Vector2i(900, 700),
+		Vector2i(800, 600),
+		Vector2i(720, 540),
+		Vector2i(640, 480),
 	]
 	for viewport_size in sizes:
 		await _check_layout(viewport_size)
@@ -36,6 +39,7 @@ func _check_layout(viewport_size: Vector2i) -> void:
 	var board = main.board_view
 	var body: HBoxContainer = board.get_parent()
 	var root_container: VBoxContainer = body.get_parent()
+	var main_scroll: ScrollContainer = main.main_scroll
 	var grid: GridContainer = board.grid
 	var scroll: ScrollContainer = board.scroll
 	var frame_rect: Rect2 = frame.get_global_rect()
@@ -62,7 +66,7 @@ func _check_layout(viewport_size: Vector2i) -> void:
 		_max_vertical_scroll(scroll),
 	])
 
-	if board_rect.position.y + board_rect.size.y > frame_rect.position.y + frame_rect.size.y:
+	if board_rect.position.y + board_rect.size.y > frame_rect.position.y + frame_rect.size.y and _max_vertical_scroll(main_scroll) <= 0:
 		_fail("Business board overflows the %s viewport. board_bottom=%.1f viewport_bottom=%.1f" % [
 			str(viewport_size),
 			board_rect.position.y + board_rect.size.y,
@@ -70,7 +74,7 @@ func _check_layout(viewport_size: Vector2i) -> void:
 		])
 		return
 
-	if board_rect.position.x + board_rect.size.x > frame_rect.position.x + frame_rect.size.x:
+	if board_rect.position.x + board_rect.size.x > frame_rect.position.x + frame_rect.size.x and _max_horizontal_scroll(main_scroll) <= 0:
 		_fail("Business board overflows the %s viewport horizontally. board_right=%.1f viewport_right=%.1f" % [
 			str(viewport_size),
 			board_rect.position.x + board_rect.size.x,
@@ -81,7 +85,7 @@ func _check_layout(viewport_size: Vector2i) -> void:
 	for child in body.get_children():
 		if child is Control:
 			var child_rect: Rect2 = (child as Control).get_global_rect()
-			if child_rect.position.x + child_rect.size.x > frame_rect.position.x + frame_rect.size.x:
+			if child_rect.position.x + child_rect.size.x > frame_rect.position.x + frame_rect.size.x and _max_horizontal_scroll(main_scroll) <= 0:
 				_fail("Main body child overflows horizontally at %s. child=%s right=%.1f viewport_right=%.1f" % [
 					str(viewport_size),
 					child.name,
@@ -93,7 +97,7 @@ func _check_layout(viewport_size: Vector2i) -> void:
 	for child in root_container.get_children():
 		if child is Control:
 			var child_rect: Rect2 = (child as Control).get_global_rect()
-			if child_rect.position.x + child_rect.size.x > frame_rect.position.x + frame_rect.size.x:
+			if child_rect.position.x + child_rect.size.x > frame_rect.position.x + frame_rect.size.x and _max_horizontal_scroll(main_scroll) <= 0:
 				_fail("Root child overflows horizontally at %s. child=%s right=%.1f viewport_right=%.1f" % [
 					str(viewport_size),
 					child.name,
@@ -101,6 +105,24 @@ func _check_layout(viewport_size: Vector2i) -> void:
 					frame_rect.position.x + frame_rect.size.x,
 				])
 				return
+
+	if _max_horizontal_scroll(main_scroll) > 0:
+		main_scroll.scroll_horizontal = _max_horizontal_scroll(main_scroll)
+		await process_frame
+		if main_scroll.scroll_horizontal <= 0:
+			_fail("Main horizontal overflow exists at %s but top-level horizontal scrolling does not move." % str(viewport_size))
+			return
+		main_scroll.scroll_horizontal = 0
+		await process_frame
+
+	if _max_vertical_scroll(main_scroll) > 0:
+		main_scroll.scroll_vertical = _max_vertical_scroll(main_scroll)
+		await process_frame
+		if main_scroll.scroll_vertical <= 0:
+			_fail("Main vertical overflow exists at %s but top-level vertical scrolling does not move." % str(viewport_size))
+			return
+		main_scroll.scroll_vertical = 0
+		await process_frame
 
 	if visible_count < 8 and _max_vertical_scroll(scroll) <= 0:
 		_fail("Expected all slots visible or scrollable at %s, but visible=%d scroll_max=0." % [str(viewport_size), visible_count])
@@ -159,6 +181,13 @@ func _check_layout(viewport_size: Vector2i) -> void:
 
 func _max_vertical_scroll(scroll: ScrollContainer) -> int:
 	var bar := scroll.get_v_scroll_bar()
+	if bar == null:
+		return 0
+	return max(0, int(ceil(bar.max_value - bar.page)))
+
+
+func _max_horizontal_scroll(scroll: ScrollContainer) -> int:
+	var bar := scroll.get_h_scroll_bar()
 	if bar == null:
 		return 0
 	return max(0, int(ceil(bar.max_value - bar.page)))

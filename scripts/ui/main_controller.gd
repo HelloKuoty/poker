@@ -12,6 +12,8 @@ var localization: LocalizationManager
 var game_state: GameState
 var type_colors := {}
 
+var main_scroll: ScrollContainer
+var main_margin: MarginContainer
 var title_label: Label
 var new_game_button: Button
 var draw_card_button: Button
@@ -40,6 +42,7 @@ var history_label: Label
 
 
 func _ready() -> void:
+	set_process(true)
 	set_process_input(true)
 	localization = LocalizationManager.new()
 	game_state = GameState.new()
@@ -48,6 +51,11 @@ func _ready() -> void:
 	game_state.state_changed.connect(_refresh_all)
 	_build_ui()
 	game_state.new_game()
+
+
+func _process(_delta: float) -> void:
+	if main_margin != null:
+		main_margin.custom_minimum_size = size
 
 
 func _input(event: InputEvent) -> void:
@@ -66,19 +74,24 @@ func _build_ui() -> void:
 	background.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(background)
 
-	var margin := MarginContainer.new()
-	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
-	margin.add_theme_constant_override("margin_left", 12)
-	margin.add_theme_constant_override("margin_right", 12)
-	margin.add_theme_constant_override("margin_top", 10)
-	margin.add_theme_constant_override("margin_bottom", 10)
-	add_child(margin)
+	main_scroll = ScrollContainer.new()
+	main_scroll.set_anchors_preset(Control.PRESET_FULL_RECT)
+	main_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
+	main_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
+	add_child(main_scroll)
+
+	main_margin = MarginContainer.new()
+	main_margin.add_theme_constant_override("margin_left", 12)
+	main_margin.add_theme_constant_override("margin_right", 12)
+	main_margin.add_theme_constant_override("margin_top", 10)
+	main_margin.add_theme_constant_override("margin_bottom", 10)
+	main_scroll.add_child(main_margin)
 
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 10)
 	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	root.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	margin.add_child(root)
+	main_margin.add_child(root)
 
 	root.add_child(_build_top_bar())
 

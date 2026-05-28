@@ -62,32 +62,32 @@ func _ensure_nodes() -> void:
 		return
 	set_process(true)
 	set_process_input(true)
-	mouse_filter = Control.MOUSE_FILTER_STOP
+	mouse_filter = Control.MOUSE_FILTER_PASS
 	var margin := MarginContainer.new()
 	margin.mouse_filter = Control.MOUSE_FILTER_PASS
 	margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	margin.add_theme_constant_override("margin_left", 10)
 	margin.add_theme_constant_override("margin_right", 10)
-	margin.add_theme_constant_override("margin_top", 8)
-	margin.add_theme_constant_override("margin_bottom", 8)
+	margin.add_theme_constant_override("margin_top", 4)
+	margin.add_theme_constant_override("margin_bottom", 4)
 	add_child(margin)
 
 	content = VBoxContainer.new()
 	content.mouse_filter = Control.MOUSE_FILTER_PASS
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	content.add_theme_constant_override("separation", 5)
+	content.add_theme_constant_override("separation", 2)
 	margin.add_child(content)
 
-	title_label = _make_label(15, true)
+	title_label = _make_label(14, true)
 	expected_label = _make_label(11, false)
-	name_label = _make_label(14, true)
+	name_label = _make_label(13, true)
 	desc_label = _make_label(12, false)
 	desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	tags_label = _make_label(11, false)
 	tags_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	option_container = VBoxContainer.new()
 	option_container.mouse_filter = Control.MOUSE_FILTER_PASS
-	option_container.add_theme_constant_override("separation", 4)
+	option_container.add_theme_constant_override("separation", 2)
 	feedback_label = _make_label(11, false)
 	feedback_label.add_theme_color_override("font_color", Color(1.0, 0.75, 0.55))
 
@@ -108,7 +108,7 @@ func _render() -> void:
 	_clear_options()
 	if card_data.is_empty():
 		name_label.text = localization.get_ui_text("draft_options") if not draft_options.is_empty() else localization.get_ui_text("empty_slot")
-		desc_label.text = localization.get_ui_text("draft_hint") if not draft_options.is_empty() else ""
+		desc_label.text = ""
 		tags_label.text = ""
 		_render_draft_options()
 	else:
@@ -123,9 +123,9 @@ func _render_draft_options() -> void:
 	for option in draft_options:
 		var option_row := PanelContainer.new()
 		option_row.tooltip_text = localization.get_text(option.get("description", {}))
-		option_row.custom_minimum_size = Vector2(0, 30)
+		option_row.custom_minimum_size = Vector2(0, 21)
 		option_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		option_row.mouse_filter = Control.MOUSE_FILTER_STOP
+		option_row.mouse_filter = Control.MOUSE_FILTER_PASS
 		option_row.add_theme_stylebox_override("panel", _make_option_style())
 		option_row.gui_input.connect(_on_option_gui_input.bind(str(option.get("id", ""))))
 
@@ -134,11 +134,11 @@ func _render_draft_options() -> void:
 		margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		margin.add_theme_constant_override("margin_left", 8)
 		margin.add_theme_constant_override("margin_right", 8)
-		margin.add_theme_constant_override("margin_top", 4)
-		margin.add_theme_constant_override("margin_bottom", 4)
+		margin.add_theme_constant_override("margin_top", 1)
+		margin.add_theme_constant_override("margin_bottom", 1)
 		option_row.add_child(margin)
 
-		var label := _make_label(14, true)
+		var label := _make_label(12, true)
 		label.text = "%s  %s" % [localization.get_text(option.get("name", {})), _effects_summary(option)]
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		label.mouse_filter = Control.MOUSE_FILTER_IGNORE

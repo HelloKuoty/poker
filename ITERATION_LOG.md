@@ -616,3 +616,54 @@
 ### Next Step
 
 - Launch a fresh visible Godot window and verify the user's original board visibility issue manually.
+
+## 2026-05-28 19:45:08 +08:00 - Top-Level Scroll and Ultra-Compact Board
+
+### Completed Work
+
+- Added a top-level `ScrollContainer` around the main UI so oversized content can still be reached instead of being clipped by the OS window.
+- Fixed the ScrollContainer child sizing issue by syncing the main content minimum size to the current window size.
+- Extended `tools/main_layout_test.gd` to validate 800x600, 720x540, and 640x480.
+- Reproduced a 720x540 failure where the board had a scroll range but wheel input did not move it in the real main layout.
+- Removed repeated per-slot draft hint text and compressed slot padding, candidate rows, and font sizes.
+- Reduced slot minimum height to 135px so all 8 board slots fit fully down to 640x480.
+- Kept the constrained board scrolling regression test by lowering its test board height.
+
+### Files Changed
+
+- `scripts/ui/main_controller.gd`
+- `scripts/ui/card_slot.gd`
+- `scenes/card_slot.tscn`
+- `tools/main_layout_test.gd`
+- `tools/board_scroll_test.gd`
+- `TODO.md`
+- `TEST_PLAN.md`
+- `ITERATION_LOG.md`
+
+### Validation Performed
+
+- `tools/main_layout_test.gd` failed first at 720x540, then passed after the ultra-compact board changes.
+- `tools/main_layout_test.gd` passes for:
+  - 1440x900: `visible_slots=8 clickable_slots=8`
+  - 1366x768: `visible_slots=8 clickable_slots=8`
+  - 1280x720: `visible_slots=8 clickable_slots=8`
+  - 1024x768: `visible_slots=8 clickable_slots=8`
+  - 960x700: `visible_slots=8 clickable_slots=8`
+  - 900x700: `visible_slots=8 clickable_slots=8`
+  - 800x600: `visible_slots=8 clickable_slots=8`
+  - 720x540: `visible_slots=8 clickable_slots=8`
+  - 640x480: `visible_slots=8 clickable_slots=8`
+- `tools/board_scroll_test.gd` passed with `BOARD_SCROLL_TEST_OK max_scroll=99 final_scroll=99`.
+- JSON validation passed for `data/cards.json`, `data/ui_text.json`, and `data/rules.json`.
+- `godot4 --headless --path . --quit` passed.
+- `godot4 --headless --path . --quit-after 2` passed.
+- `godot4 --headless --path . --script tools/smoke_test.gd` passed with `SMOKE_TEST_OK stage=3 funds=83 trust=61 hand=2`.
+- `git diff --check` passed.
+
+### Known Issues
+
+- Very small windows trade text density for reachability; full card text remains available through details and tooltips.
+
+### Next Step
+
+- Commit, push, and launch a fresh visible Godot window.
