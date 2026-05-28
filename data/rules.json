@@ -1,0 +1,62 @@
+{
+  "default_language": "zh",
+  "supported_languages": ["zh", "en"],
+  "required_slots": ["customer", "pain", "solution", "product", "channel", "revenue", "cost", "moat"],
+  "card_types": ["customer", "pain", "solution", "product", "channel", "revenue", "cost", "moat", "risk", "event"],
+  "initial_hand_size": 10,
+  "max_hand_size": 16,
+  "dimensions": [
+    "demand_strength",
+    "willingness_to_pay",
+    "acquisition_efficiency",
+    "delivery_efficiency",
+    "profit_potential",
+    "defensibility",
+    "risk_resilience"
+  ],
+  "ratings": [
+    {"rating": "S", "min_score": 85},
+    {"rating": "A", "min_score": 75},
+    {"rating": "B", "min_score": 60},
+    {"rating": "C", "min_score": 45},
+    {"rating": "D", "min_score": 0}
+  ],
+  "dimension_weights": {
+    "demand_strength": 1.1,
+    "willingness_to_pay": 1.0,
+    "acquisition_efficiency": 0.9,
+    "delivery_efficiency": 0.9,
+    "profit_potential": 1.1,
+    "defensibility": 1.0,
+    "risk_resilience": 1.0
+  },
+  "type_colors": {
+    "customer": "#2f6fed",
+    "pain": "#d94b4b",
+    "solution": "#238b65",
+    "product": "#7c4bc9",
+    "channel": "#c77b1d",
+    "revenue": "#188f9c",
+    "cost": "#8b5a2b",
+    "moat": "#56636f",
+    "risk": "#b62929",
+    "event": "#2f8a43"
+  },
+  "survival": {
+    "max_stage": 6,
+    "reward_choice_count": 3,
+    "starting_resources": {
+      "funds": 100,
+      "time": 12,
+      "trust": 55,
+      "users": 0
+    },
+    "stage_cost": {
+      "funds": 12,
+      "time": 1
+    },
+    "missing_slot_funds_penalty": 4,
+    "low_score_trust_penalty": 10,
+    "win_min_score": 60
+  }
+}

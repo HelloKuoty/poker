@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://business_card_slot"]
+
+[ext_resource type="Script" path="res://scripts/ui/card_slot.gd" id="1_card_slot"]
+
+[node name="CardSlot" type="PanelContainer"]
+custom_minimum_size = Vector2(220, 166)
+script = ExtResource("1_card_slot")
+
