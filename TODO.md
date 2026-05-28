@@ -2,7 +2,7 @@
 
 ## Current Goal
 
-Move draft choices into each business board slot so every slot directly shows its 3 options.
+Fix board overflow by making the business board scrollable when in-slot draft options exceed the viewport.
 
 ## Completed This Iteration
 

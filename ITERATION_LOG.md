@@ -306,6 +306,60 @@
 
 - Open the visible game window and verify the board now feels simpler than the separated draft panel.
 
+## 2026-05-28 18:56:04 +08:00 - In-Board Draft Visible Launch
+
+### Completed Work
+
+- Updated `TODO.md` current goal for visible manual testing.
+- Started the latest in-board draft version in a visible Godot window.
+
+### Files Changed
+
+- `TODO.md`
+- `ITERATION_LOG.md`
+
+### Validation Performed
+
+- Confirmed local branch is synced with `origin/main`.
+- Launched `C:\Users\Jiang\AppData\Local\Microsoft\WinGet\Links\godot.exe --path .` from the project directory.
+
+### Known Issues
+
+- Manual readability result is not recorded yet.
+
+### Next Step
+
+- Check whether in-slot candidate choices are readable and easier to understand.
+
+## 2026-05-28 18:57:15 +08:00 - Scrollable Business Board
+
+### Completed Work
+
+- Made the business board content scrollable.
+- Kept the board title fixed while the slot grid scrolls.
+- Disabled horizontal scrolling so the board remains a vertical scan surface.
+
+### Files Changed
+
+- `scripts/ui/board_view.gd`
+- `TODO.md`
+- `ITERATION_LOG.md`
+
+### Validation Performed
+
+- JSON validation passed for `data/cards.json`, `data/ui_text.json`, and `data/rules.json`.
+- `godot4 --headless --path . --quit` passed.
+- `godot4 --headless --path . --quit-after 2` passed.
+- `godot4 --headless --path . --script tools/smoke_test.gd` passed with `SMOKE_TEST_OK`.
+
+### Known Issues
+
+- Visible manual check is still needed to verify mouse wheel behavior and readability.
+
+### Next Step
+
+- Run Godot CLI validation and relaunch the visible window.
+
 ## 2026-05-28 18:49:48 +08:00 - V3 Visible Launch
 
 ### Completed Work

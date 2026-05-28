@@ -12,6 +12,7 @@ const REQUIRED_SLOTS := ["customer", "pain", "solution", "product", "channel", "
 
 var localization: LocalizationManager
 var title_label: Label
+var scroll: ScrollContainer
 var grid: GridContainer
 
 
@@ -62,13 +63,18 @@ func _ensure_nodes() -> void:
 	title_label.add_theme_color_override("font_color", Color.WHITE)
 	root.add_child(title_label)
 
+	scroll = ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	root.add_child(scroll)
+
 	grid = GridContainer.new()
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 10)
 	grid.add_theme_constant_override("v_separation", 10)
-	grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	root.add_child(grid)
+	scroll.add_child(grid)
 
 
 func _clear_slots() -> void:
