@@ -89,7 +89,7 @@ func _build_ui() -> void:
 	root.add_child(body)
 
 	board_view = BoardView.new()
-	board_view.custom_minimum_size = Vector2(760, 0)
+	board_view.custom_minimum_size = Vector2(560, 0)
 	board_view.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	board_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	board_view.setup(localization)
@@ -98,7 +98,7 @@ func _build_ui() -> void:
 	body.add_child(board_view)
 
 	var right_scroll := ScrollContainer.new()
-	right_scroll.custom_minimum_size = Vector2(430, 0)
+	right_scroll.custom_minimum_size = Vector2(300, 0)
 	right_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	right_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	right_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
@@ -238,7 +238,7 @@ func _build_pressure_panel() -> PanelContainer:
 
 func _make_button(callback: Callable) -> Button:
 	var button := Button.new()
-	button.custom_minimum_size = Vector2(92, 34)
+	button.custom_minimum_size = Vector2(74, 34)
 	button.pressed.connect(callback)
 	return button
 

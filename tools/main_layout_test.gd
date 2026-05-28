@@ -12,6 +12,9 @@ func _run() -> void:
 		Vector2i(1440, 900),
 		Vector2i(1366, 768),
 		Vector2i(1280, 720),
+		Vector2i(1024, 768),
+		Vector2i(960, 700),
+		Vector2i(900, 700),
 	]
 	for viewport_size in sizes:
 		await _check_layout(viewport_size)
@@ -32,6 +35,7 @@ func _check_layout(viewport_size: Vector2i) -> void:
 
 	var board = main.board_view
 	var body: HBoxContainer = board.get_parent()
+	var root_container: VBoxContainer = body.get_parent()
 	var grid: GridContainer = board.grid
 	var scroll: ScrollContainer = board.scroll
 	var frame_rect: Rect2 = frame.get_global_rect()
@@ -39,18 +43,22 @@ func _check_layout(viewport_size: Vector2i) -> void:
 	var scroll_rect: Rect2 = scroll.get_global_rect()
 	var grid_rect: Rect2 = grid.get_global_rect()
 	var visible_count := 0
+	var clickable_count := 0
 	for slot in grid.get_children():
 		var slot_rect: Rect2 = slot.get_global_rect()
 		if scroll_rect.encloses(slot_rect):
 			visible_count += 1
+		if frame_rect.has_point(slot_rect.get_center()) and scroll_rect.has_point(slot_rect.get_center()):
+			clickable_count += 1
 
-	print("MAIN_LAYOUT size=%s board=%s scroll=%s grid=%s columns=%d visible_slots=%d scroll_max=%d" % [
+	print("MAIN_LAYOUT size=%s board=%s scroll=%s grid=%s columns=%d visible_slots=%d clickable_slots=%d scroll_max=%d" % [
 		str(viewport_size),
 		str(board_rect.size),
 		str(scroll_rect.size),
 		str(grid_rect.size),
 		grid.columns,
 		visible_count,
+		clickable_count,
 		_max_vertical_scroll(scroll),
 	])
 
@@ -82,8 +90,24 @@ func _check_layout(viewport_size: Vector2i) -> void:
 				])
 				return
 
+	for child in root_container.get_children():
+		if child is Control:
+			var child_rect: Rect2 = (child as Control).get_global_rect()
+			if child_rect.position.x + child_rect.size.x > frame_rect.position.x + frame_rect.size.x:
+				_fail("Root child overflows horizontally at %s. child=%s right=%.1f viewport_right=%.1f" % [
+					str(viewport_size),
+					child.name,
+					child_rect.position.x + child_rect.size.x,
+					frame_rect.position.x + frame_rect.size.x,
+				])
+				return
+
 	if visible_count < 8 and _max_vertical_scroll(scroll) <= 0:
 		_fail("Expected all slots visible or scrollable at %s, but visible=%d scroll_max=0." % [str(viewport_size), visible_count])
+		return
+
+	if clickable_count < 8 and _max_vertical_scroll(scroll) <= 0:
+		_fail("Expected all slot centers clickable or scrollable at %s, but clickable=%d scroll_max=0." % [str(viewport_size), clickable_count])
 		return
 
 	if _max_vertical_scroll(scroll) > 0:

@@ -571,3 +571,48 @@
 ### Next Step
 
 - Relaunch the visible Godot window and manually verify that all 8 board slots are immediately visible.
+
+## 2026-05-28 19:38:42 +08:00 - Smaller Window Board Reachability Fix
+
+### Completed Work
+
+- Extended `tools/main_layout_test.gd` again to validate 1024x768, 960x700, and 900x700.
+- Added clickable-slot center checks so the test verifies that each slot's center is inside both the viewport and the board scroll area.
+- Reproduced a horizontal overflow at 1024x768 caused by the right-side column minimum width.
+- Reduced the board minimum width to 560px, the right-side panel minimum width to 300px, and top-bar button minimum width to 74px.
+- Reduced the slot scene minimum width to 120px so compact 4-column layout remains within the viewport.
+- Verified that all 8 board slots are visible and clickable from 1440x900 down to 900x700.
+
+### Files Changed
+
+- `scripts/ui/main_controller.gd`
+- `scenes/card_slot.tscn`
+- `tools/main_layout_test.gd`
+- `TODO.md`
+- `TEST_PLAN.md`
+- `ITERATION_LOG.md`
+
+### Validation Performed
+
+- `tools/main_layout_test.gd` failed first at 1024x768 with horizontal overflow, then passed after width reductions.
+- `tools/main_layout_test.gd` passes for:
+  - 1440x900: `visible_slots=8 clickable_slots=8`
+  - 1366x768: `visible_slots=8 clickable_slots=8`
+  - 1280x720: `visible_slots=8 clickable_slots=8`
+  - 1024x768: `visible_slots=8 clickable_slots=8`
+  - 960x700: `visible_slots=8 clickable_slots=8`
+  - 900x700: `visible_slots=8 clickable_slots=8`
+- `tools/board_scroll_test.gd` passed with `BOARD_SCROLL_TEST_OK max_scroll=161 final_scroll=140`.
+- JSON validation passed for `data/cards.json`, `data/ui_text.json`, and `data/rules.json`.
+- `godot4 --headless --path . --quit` passed.
+- `godot4 --headless --path . --quit-after 2` passed.
+- `godot4 --headless --path . --script tools/smoke_test.gd` passed with `SMOKE_TEST_OK stage=3 funds=80 trust=55 hand=2`.
+- `git diff --check` passed.
+
+### Known Issues
+
+- Compact window sizes rely on ellipsis for card names; full card text remains available through details and tooltips.
+
+### Next Step
+
+- Launch a fresh visible Godot window and verify the user's original board visibility issue manually.
