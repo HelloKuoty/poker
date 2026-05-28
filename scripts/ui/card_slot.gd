@@ -30,6 +30,7 @@ var pointer_last_global := Vector2.ZERO
 var pointer_option_id := ""
 
 const DRAG_THRESHOLD := 7.0
+const WHEEL_STEP := 90.0
 
 
 func setup(expected_type: String, placed_card: Dictionary, options: Array, loc: LocalizationManager, current_selected_type: String = "", colors: Dictionary = {}) -> void:
@@ -47,10 +48,20 @@ func _gui_input(event: InputEvent) -> void:
 	_handle_pointer_event(event, "")
 
 
+func _input(event: InputEvent) -> void:
+	if not pointer_down:
+		return
+	if event is InputEventMouseMotion:
+		_track_pointer_motion(_event_mouse_position(event))
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+		_handle_pointer_event(event, pointer_option_id)
+
+
 func _ensure_nodes() -> void:
 	if content != null:
 		return
 	set_process(true)
+	set_process_input(true)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var margin := MarginContainer.new()
 	margin.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -133,6 +144,13 @@ func _render_draft_options() -> void:
 
 
 func _handle_pointer_event(event: InputEvent, option_id: String) -> void:
+	if event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			emit_signal("pan_dragged", Vector2(0, WHEEL_STEP))
+			return
+		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			emit_signal("pan_dragged", Vector2(0, -WHEEL_STEP))
+			return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			pointer_down = true
@@ -181,9 +199,9 @@ func _on_option_gui_input(event: InputEvent, card_id: String) -> void:
 
 func _event_mouse_position(event: InputEvent) -> Vector2:
 	if event is InputEventMouseButton:
-		return event.global_position
+		return event.global_position if not event.global_position.is_zero_approx() else event.position
 	if event is InputEventMouseMotion:
-		return event.global_position
+		return event.global_position if not event.global_position.is_zero_approx() else event.position
 	return get_viewport().get_mouse_position()
 
 
@@ -212,7 +230,9 @@ func _make_label(font_size: int, bold: bool) -> Label:
 	var label := Label.new()
 	label.add_theme_font_size_override("font_size", font_size)
 	label.add_theme_color_override("font_color", Color(1, 1, 1) if bold else Color(0.86, 0.9, 0.94))
-	label.clip_text = false
+	label.clip_text = true
+	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return label
 

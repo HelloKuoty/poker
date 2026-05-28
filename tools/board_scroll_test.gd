@@ -73,12 +73,18 @@ func _run() -> void:
 	motion.position = drag_start + Vector2(0, -180)
 	motion.relative = Vector2(0, -180)
 	board._input(motion)
+	var release := InputEventMouseButton.new()
+	release.button_index = MOUSE_BUTTON_LEFT
+	release.pressed = false
+	release.position = motion.position
+	board._input(release)
 	await process_frame
 	if scroll.scroll_vertical <= 0:
 		_fail("Mouse drag event cannot move board content.")
 		return
 
 	scroll.scroll_vertical = 0
+	await process_frame
 	var first_slot = board.grid.get_child(0)
 	var slot_drag_start: Vector2 = first_slot.get_global_rect().get_center()
 	var viewport_press := InputEventMouseButton.new()

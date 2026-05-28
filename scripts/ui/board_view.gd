@@ -30,6 +30,12 @@ func setup(loc: LocalizationManager) -> void:
 	_ensure_nodes()
 
 
+func handle_global_pointer_event(event: InputEvent) -> bool:
+	if scroll == null:
+		return false
+	return _handle_board_pointer_input(event, false)
+
+
 func render(slots: Dictionary, draft_options: Dictionary, selected_card_type: String, loc: LocalizationManager, type_colors: Dictionary) -> void:
 	localization = loc
 	_ensure_nodes()
@@ -49,30 +55,6 @@ func render(slots: Dictionary, draft_options: Dictionary, selected_card_type: St
 func _input(event: InputEvent) -> void:
 	if scroll == null:
 		return
-	var mouse_position := _event_mouse_position(event)
-	if event is InputEventMouseButton and event.pressed and _is_position_over_board(mouse_position):
-		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			_scroll_by(-WHEEL_STEP)
-			get_viewport().set_input_as_handled()
-			return
-		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			_scroll_by(WHEEL_STEP)
-			get_viewport().set_input_as_handled()
-			return
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		if event.pressed and _is_position_over_board(mouse_position):
-			drag_candidate = true
-			dragging = false
-			drag_start_mouse = mouse_position
-			drag_start_vertical = scroll.scroll_vertical
-			drag_start_horizontal = scroll.scroll_horizontal
-		elif drag_candidate:
-			if dragging:
-				get_viewport().set_input_as_handled()
-			drag_candidate = false
-			dragging = false
-	if event is InputEventMouseMotion and drag_candidate:
-		_apply_drag_to(mouse_position)
 	if event is InputEventKey and event.pressed:
 		if event.keycode == KEY_PAGEUP:
 			_scroll_by(-KEY_STEP)
@@ -80,6 +62,14 @@ func _input(event: InputEvent) -> void:
 		elif event.keycode == KEY_PAGEDOWN:
 			_scroll_by(KEY_STEP)
 			get_viewport().set_input_as_handled()
+	elif event is InputEventMouse:
+		if _handle_board_pointer_input(event, false):
+			get_viewport().set_input_as_handled()
+
+
+func _gui_input(event: InputEvent) -> void:
+	if _handle_board_pointer_input(event, true):
+		accept_event()
 
 
 func _process(_delta: float) -> void:
@@ -96,6 +86,7 @@ func _ensure_nodes() -> void:
 	if grid != null:
 		return
 	set_process(true)
+	set_process_input(true)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.06, 0.075, 0.085)
@@ -145,10 +136,11 @@ func _ensure_nodes() -> void:
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
 	scroll.follow_focus = true
+	scroll.gui_input.connect(_on_scroll_gui_input)
 	root.add_child(scroll)
 
 	grid = GridContainer.new()
-	grid.columns = 2
+	grid.columns = 3
 	grid.add_theme_constant_override("h_separation", 10)
 	grid.add_theme_constant_override("v_separation", 10)
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -169,13 +161,17 @@ func _on_draft_option_clicked(slot_type: String, card_id: String) -> void:
 	emit_signal("draft_option_clicked", slot_type, card_id)
 
 
+func _on_scroll_gui_input(event: InputEvent) -> void:
+	if _handle_board_pointer_input(event, true):
+		accept_event()
+
+
 func _on_slot_pan_started() -> void:
-	pass
+	drag_candidate = false
+	dragging = false
 
 
 func _on_slot_pan_dragged(delta: Vector2) -> void:
-	if drag_candidate or dragging:
-		return
 	_scroll_by(-int(delta.y))
 
 
@@ -185,13 +181,14 @@ func _scroll_by(amount: int) -> void:
 	scroll.scroll_vertical = clampi(scroll.scroll_vertical + amount, 0, _max_vertical_scroll())
 
 
-func _apply_drag_to(current_mouse: Vector2) -> void:
+func _apply_drag_to(current_mouse: Vector2) -> bool:
 	var delta := current_mouse - drag_start_mouse
 	if dragging or abs(delta.y) > 6.0 or abs(delta.x) > 6.0:
 		dragging = true
 		scroll.scroll_vertical = clampi(drag_start_vertical - int(delta.y), 0, _max_vertical_scroll())
 		scroll.scroll_horizontal = max(0, drag_start_horizontal - int(delta.x))
-		get_viewport().set_input_as_handled()
+		return true
+	return false
 
 
 func _max_vertical_scroll() -> int:
@@ -218,11 +215,39 @@ func _update_scroll_button_text() -> void:
 	scroll_down_button.tooltip_text = localization.get_ui_text("scroll_down") if localization != null else ""
 
 
-func _event_mouse_position(event: InputEvent) -> Vector2:
+func _handle_board_pointer_input(event: InputEvent, use_global_position: bool) -> bool:
+	var mouse_position := _event_mouse_position(event, use_global_position)
+	if event is InputEventMouseButton and event.pressed and _is_position_over_board(mouse_position):
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			_scroll_by(-WHEEL_STEP)
+			return true
+		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			_scroll_by(WHEEL_STEP)
+			return true
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed and _is_position_over_board(mouse_position):
+			drag_candidate = true
+			dragging = false
+			drag_start_mouse = mouse_position
+			drag_start_vertical = scroll.scroll_vertical
+			drag_start_horizontal = scroll.scroll_horizontal
+		elif drag_candidate:
+			if dragging:
+				drag_candidate = false
+				dragging = false
+				return true
+			drag_candidate = false
+			dragging = false
+	if event is InputEventMouseMotion and drag_candidate:
+		return _apply_drag_to(mouse_position)
+	return false
+
+
+func _event_mouse_position(event: InputEvent, use_global_position: bool) -> Vector2:
 	if event is InputEventMouseButton:
-		return event.position
+		return event.global_position if use_global_position else event.position
 	if event is InputEventMouseMotion:
-		return event.position
+		return event.global_position if use_global_position else event.position
 	return get_viewport().get_mouse_position()
 
 

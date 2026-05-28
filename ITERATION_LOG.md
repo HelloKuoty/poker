@@ -485,3 +485,45 @@
 ### Next Step
 
 - Commit, push, relaunch the visible Godot window, and manually test dragging on slots and candidate rows.
+
+## 2026-05-28 19:30:21 +08:00 - Main Layout Board Visibility Fix
+
+### Completed Work
+
+- Added `tools/main_layout_test.gd` to instantiate the real main scene inside a 1440x900 frame.
+- Reproduced the real layout bug: the business board was being stretched to 1271px tall by the right-side panels, so lower content could be clipped by the window rather than scrolled inside the board.
+- Moved the right-side panels into their own vertical `ScrollContainer`, preventing them from stretching the whole main layout.
+- Changed the business board grid to 3 columns so all 8 model slots are visible at the default 1440x900 project resolution.
+- Kept constrained-size board scrolling covered by `tools/board_scroll_test.gd`.
+- Added root-level pointer forwarding and explicit input processing as additional fallback for board mouse events.
+- Updated label clipping so denser board cells do not force the layout wider than the viewport.
+
+### Files Changed
+
+- `scripts/ui/main_controller.gd`
+- `scripts/ui/board_view.gd`
+- `scripts/ui/card_slot.gd`
+- `tools/board_scroll_test.gd`
+- `tools/main_layout_test.gd`
+- `TODO.md`
+- `TEST_PLAN.md`
+- `ITERATION_LOG.md`
+
+### Validation Performed
+
+- `tools/main_layout_test.gd` failed first with `Business board overflows the 1440x900 viewport`, then passed after the right-column scroll and 3-column board fix.
+- `tools/board_scroll_test.gd` caught a stale-position test issue after the layout change; the test now waits a frame after resetting scroll and passes.
+- JSON validation passed for `data/cards.json`, `data/ui_text.json`, and `data/rules.json`.
+- `godot4 --headless --path . --quit` passed.
+- `godot4 --headless --path . --quit-after 2` passed.
+- `godot4 --headless --path . --script tools/smoke_test.gd` passed with `SMOKE_TEST_OK stage=3 funds=86 trust=61 hand=2`.
+- `godot4 --headless --path . --script tools/board_scroll_test.gd` passed with `BOARD_SCROLL_TEST_OK max_scroll=233 final_scroll=140`.
+- `godot4 --headless --path . --script tools/main_layout_test.gd` passed with `visible_slots=8 scroll_max=0`.
+
+### Known Issues
+
+- Needs one visible-window manual check to confirm candidate rows remain readable enough in the 3-column layout.
+
+### Next Step
+
+- Launch a fresh visible Godot window and manually verify that all 8 board slots are visible immediately.

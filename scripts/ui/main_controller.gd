@@ -40,6 +40,7 @@ var history_label: Label
 
 
 func _ready() -> void:
+	set_process_input(true)
 	localization = LocalizationManager.new()
 	game_state = GameState.new()
 	type_colors = _load_type_colors()
@@ -47,6 +48,13 @@ func _ready() -> void:
 	game_state.state_changed.connect(_refresh_all)
 	_build_ui()
 	game_state.new_game()
+
+
+func _input(event: InputEvent) -> void:
+	if board_view == null:
+		return
+	if event is InputEventMouse and board_view.handle_global_pointer_event(event):
+		get_viewport().set_input_as_handled()
 
 
 func _build_ui() -> void:
@@ -89,11 +97,18 @@ func _build_ui() -> void:
 	board_view.draft_option_clicked.connect(_on_draft_option_clicked)
 	body.add_child(board_view)
 
+	var right_scroll := ScrollContainer.new()
+	right_scroll.custom_minimum_size = Vector2(430, 0)
+	right_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	right_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	right_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
+	body.add_child(right_scroll)
+
 	var right_column := VBoxContainer.new()
-	right_column.custom_minimum_size = Vector2(430, 0)
 	right_column.add_theme_constant_override("separation", 10)
+	right_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	right_column.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	body.add_child(right_column)
+	right_scroll.add_child(right_column)
 
 	right_column.add_child(_build_survival_panel())
 

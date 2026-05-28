@@ -21,17 +21,17 @@ Enter a test-fix-test loop for the unresolved business board navigation bug unti
 
 ## Current Iteration
 
-- Replace unlimited free draw as the main strategy.
-- Generate 3 candidate cards per business slot.
-- Show candidate cards directly inside each empty business board slot.
-- Let players place cards by choosing in-slot candidates.
-- Make `Draw Card` act as paid reroll of current candidate options.
-- Keep reward choices and survival loop compatible.
+- Fix the unresolved business board navigation bug with a test-fix-test loop.
+- Keep the main scene within a 1440x900 viewport.
+- Show all 8 business board slots at once using a 3-column board layout.
+- Keep right-side score/summary/detail panels scrollable without stretching the whole app.
+- Preserve fallback scrolling for constrained board sizes.
 
 ## Remaining
 
-- Run the project in the Godot editor with a visible window after V2 CLI validation.
-- Playtest the survival loop manually.
+- Run the project in a visible Godot window after the layout fix.
+- Manually confirm all 8 board slots are visible at launch.
+- Manually confirm candidate selection still works in the denser 3-column layout.
 - Tune resource balance and reward pacing.
 - Improve survival UI readability after manual playtest.
 - Tune draft reroll cost and candidate count.
