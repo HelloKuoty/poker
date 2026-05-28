@@ -213,6 +213,9 @@
 - `godot4 --headless --path . --quit` passed.
 - `godot4 --headless --path . --script tools/smoke_test.gd` passed with `SMOKE_TEST_OK`.
 - Public repository URL: `https://github.com/HelloKuoty/poker`.
+- First published commit: `9ecdfdc`.
+- GitHub visibility verified as `PUBLIC`.
+- Remote default branch verified as `main`.
 
 ### Known Issues
 
@@ -220,4 +223,4 @@
 
 ### Next Step
 
-- Push the first commit to `https://github.com/HelloKuoty/poker`.
+- Continue manual visible playtesting and tune survival balance.

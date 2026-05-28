@@ -2,7 +2,7 @@
 
 ## Current Goal
 
-Commit the current Godot MVP to GitHub and publish the repository as public.
+Public GitHub publication is complete; next focus is manual visible playtesting and survival balance tuning.
 
 ## Completed This Iteration
 
