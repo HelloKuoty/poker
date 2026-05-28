@@ -2,7 +2,7 @@
 
 ## Current Goal
 
-Public GitHub publication is complete; next focus is manual visible playtesting and survival balance tuning.
+Implement V3 business-board draft mode: each board slot offers 3 options, and rerolling options costs resources.
 
 ## Completed This Iteration
 
@@ -21,9 +21,11 @@ Public GitHub publication is complete; next focus is manual visible playtesting 
 
 ## Current Iteration
 
-- V2 survival loop is implemented.
-- Godot CLI validation passes.
-- Smoke test covers new game, slot placement, scoring, stage advancement, and reward selection.
+- Replace unlimited free draw as the main strategy.
+- Generate 3 candidate cards per business slot.
+- Let players place cards by choosing slot candidates.
+- Make `Draw Card` act as paid reroll of current candidate options.
+- Keep reward choices and survival loop compatible.
 
 ## Remaining
 
@@ -31,4 +33,5 @@ Public GitHub publication is complete; next focus is manual visible playtesting 
 - Playtest the survival loop manually.
 - Tune resource balance and reward pacing.
 - Improve survival UI readability after manual playtest.
+- Tune draft reroll cost and candidate count.
 - Optional: add drag-and-drop after click placement remains stable.

@@ -224,3 +224,45 @@
 ### Next Step
 
 - Continue manual visible playtesting and tune survival balance.
+
+## 2026-05-28 18:07:36 +08:00 - V3 Board Draft Mode
+
+### Completed Work
+
+- Changed the main card-selection loop from unlimited drawing to board-slot drafting.
+- Added 3 candidate options per core business board slot.
+- Added direct candidate selection into the matching board slot.
+- Changed `Draw Card` into paid `Reroll Options`.
+- Rerolling refreshes empty-slot candidate options and consumes funds/time.
+- Kept reward cards and hand placement compatible with the survival loop.
+- Updated the smoke test to fill slots through draft options.
+
+### Files Changed
+
+- `data/ui_text.json`
+- `data/rules.json`
+- `scripts/core/game_state.gd`
+- `scripts/ui/main_controller.gd`
+- `scripts/ui/draft_view.gd`
+- `tools/smoke_test.gd`
+- `README.md`
+- `TEST_PLAN.md`
+- `TODO.md`
+- `HANDOFF.md`
+- `ITERATION_LOG.md`
+
+### Validation Performed
+
+- JSON validation passed for `data/cards.json`, `data/ui_text.json`, and `data/rules.json`.
+- `godot4 --headless --path . --quit` passed.
+- `godot4 --headless --path . --quit-after 2` passed.
+- `godot4 --headless --path . --script tools/smoke_test.gd` passed with `SMOKE_TEST_OK`.
+
+### Known Issues
+
+- Draft UI is functional but dense.
+- Reroll economy needs playtesting.
+
+### Next Step
+
+- Playtest V3 draft choices visually and tune reroll cost.

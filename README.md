@@ -24,11 +24,13 @@ godot4 --headless --path . --script tools/smoke_test.gd
 ## Gameplay Overview
 
 - Click `新游戏 / New Game` to reset the run.
-- Click a card in the hand to select it.
+- The left `Board Draft Options` tab shows 3 candidate cards for each empty board slot.
+- Click a draft candidate to place it directly into that slot.
+- `重抽候选 / Reroll Options` refreshes options for empty slots and costs funds/time.
+- Reward cards still enter the hand; click a hand card to select it.
 - Click the matching board slot to place it.
 - A wrong slot shows invalid placement feedback.
 - Existing slot cards can be replaced; the replaced card returns to hand.
-- Click `抽牌 / Draw Card` for more business model cards.
 - Click `评分 / Score Model` to recalculate.
 - Click `抽风险 / Draw Risk` and `抽事件 / Draw Event` to pressure-test the model.
 - Read score explanations, combo/anti-combo notes, strengths, weaknesses, validation suggestions, and the generated summary.
@@ -45,6 +47,15 @@ V2 adds the first roguelite-style survival loop. The model now has four resource
 Click `下一阶段 / Next Stage` to resolve the current stage. A stage consumes funds and time, uses the current score to update trust/users/funds, triggers automatic risk/event pressure, then offers 3 reward cards. Choose 1 reward card before advancing again.
 
 The run ends when funds, time, or trust reaches zero. Survive all configured stages with a sufficient final score to clear the run.
+
+## Draft Mode
+
+V3 changes the main decision from unlimited drawing to board-slot drafting:
+
+- each core board slot offers 3 options
+- choosing an option places it into that slot
+- rerolling options costs resources
+- the player must build the best model from limited choices instead of drawing forever
 
 ## Bilingual Support
 

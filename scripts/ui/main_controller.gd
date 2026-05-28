@@ -3,6 +3,7 @@ extends Control
 const LocalizationManager = preload("res://scripts/core/localization_manager.gd")
 const GameState = preload("res://scripts/core/game_state.gd")
 const HandView = preload("res://scripts/ui/hand_view.gd")
+const DraftView = preload("res://scripts/ui/draft_view.gd")
 const BoardView = preload("res://scripts/ui/board_view.gd")
 const ScorePanel = preload("res://scripts/ui/score_panel.gd")
 const SummaryPanel = preload("res://scripts/ui/summary_panel.gd")
@@ -23,6 +24,7 @@ var restart_button: Button
 var language_button: Button
 
 var hand_view: HandView
+var draft_view: DraftView
 var board_view: BoardView
 var score_panel: ScorePanel
 var summary_panel: SummaryPanel
@@ -80,12 +82,22 @@ func _build_ui() -> void:
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	root.add_child(body)
 
+	var left_tabs := TabContainer.new()
+	left_tabs.custom_minimum_size = Vector2(340, 0)
+	left_tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body.add_child(left_tabs)
+
+	draft_view = DraftView.new()
+	draft_view.name = "Draft"
+	draft_view.setup(localization)
+	draft_view.draft_option_clicked.connect(_on_draft_option_clicked)
+	left_tabs.add_child(draft_view)
+
 	hand_view = HandView.new()
-	hand_view.custom_minimum_size = Vector2(320, 0)
-	hand_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	hand_view.name = "Hand"
 	hand_view.setup(localization)
 	hand_view.card_clicked.connect(_on_hand_card_clicked)
-	body.add_child(hand_view)
+	left_tabs.add_child(hand_view)
 
 	board_view = BoardView.new()
 	board_view.custom_minimum_size = Vector2(560, 0)
@@ -233,6 +245,7 @@ func _refresh_all() -> void:
 	_refresh_top_text()
 	var selected_card: Dictionary = game_state.get_selected_card()
 	var selected_type := str(selected_card.get("type", ""))
+	draft_view.render(game_state.draft_options, localization, type_colors)
 	hand_view.render(game_state.hand, game_state.selected_card_id, localization, type_colors)
 	board_view.render(game_state.business_model.get_slots(), selected_type, localization, type_colors)
 	score_panel.render(game_state.score_result, localization)
@@ -246,6 +259,13 @@ func _refresh_top_text() -> void:
 	title_label.text = localization.get_ui_text("game_title")
 	new_game_button.text = localization.get_ui_text("new_game")
 	draw_card_button.text = localization.get_ui_text("draw_card")
+	draw_card_button.tooltip_text = "%s: %s %d | %s %d" % [
+		localization.get_ui_text("reroll_cost"),
+		localization.get_ui_text("funds"),
+		int(game_state.draft_reroll_cost.get("funds", 0)),
+		localization.get_ui_text("time"),
+		int(game_state.draft_reroll_cost.get("time", 0)),
+	]
 	score_button.text = localization.get_ui_text("score_model")
 	next_stage_button.text = localization.get_ui_text("next_stage")
 	draw_risk_button.text = localization.get_ui_text("draw_risk")
@@ -318,6 +338,10 @@ func _on_hand_card_clicked(card_id: String) -> void:
 
 func _on_slot_clicked(slot_type: String) -> void:
 	game_state.place_selected_card(slot_type)
+
+
+func _on_draft_option_clicked(slot_type: String, card_id: String) -> void:
+	game_state.choose_draft_option(slot_type, card_id)
 
 
 func _on_new_game_pressed() -> void:

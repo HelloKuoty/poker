@@ -24,10 +24,21 @@ func _init() -> void:
 
 func _fill_board_from_hand(state: GameState) -> void:
 	for slot_type in GameState.REQUIRED_SLOTS:
-		var card_id := _find_hand_card_id(state, str(slot_type))
+		var card_id := _find_draft_card_id(state, str(slot_type))
 		if card_id != "":
-			state.select_card(card_id)
-			state.place_selected_card(str(slot_type))
+			state.choose_draft_option(str(slot_type), card_id)
+		else:
+			card_id = _find_hand_card_id(state, str(slot_type))
+			if card_id != "":
+				state.select_card(card_id)
+				state.place_selected_card(str(slot_type))
+
+
+func _find_draft_card_id(state: GameState, slot_type: String) -> String:
+	var options: Array = state.draft_options.get(slot_type, [])
+	if options.is_empty():
+		return ""
+	return str(options[0].get("id", ""))
 
 
 func _find_hand_card_id(state: GameState, card_type: String) -> String:

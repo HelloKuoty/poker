@@ -14,6 +14,7 @@ const DEFAULT_INITIAL_HAND_SIZE := 10
 const DEFAULT_MAX_HAND_SIZE := 16
 const DEFAULT_MAX_STAGE := 6
 const DEFAULT_REWARD_CHOICE_COUNT := 3
+const DEFAULT_DRAFT_OPTIONS_PER_SLOT := 3
 
 var deck_manager := DeckManager.new()
 var business_model := BusinessModel.new()
@@ -31,6 +32,10 @@ var validation_result := {}
 var feedback_key := ""
 var initial_hand_size := DEFAULT_INITIAL_HAND_SIZE
 var max_hand_size := DEFAULT_MAX_HAND_SIZE
+var draft_enabled := true
+var draft_options_per_slot := DEFAULT_DRAFT_OPTIONS_PER_SLOT
+var draft_reroll_cost := {"funds": 8, "time": 1}
+var draft_options := {}
 var current_stage := 1
 var max_stage := DEFAULT_MAX_STAGE
 var reward_choice_count := DEFAULT_REWARD_CHOICE_COUNT
@@ -59,7 +64,8 @@ func new_game() -> void:
 	active_event_card = {}
 	selected_card_id = ""
 	_reset_survival()
-	hand = deck_manager.draw_initial_hand(REQUIRED_SLOTS, initial_hand_size)
+	hand = []
+	_generate_all_draft_options()
 	feedback_key = "new_game_started"
 	score_current_model(false)
 	emit_signal("state_changed")
@@ -70,19 +76,50 @@ func restart() -> void:
 
 
 func draw_card() -> void:
+	reroll_draft_options()
+
+
+func reroll_draft_options() -> void:
 	if game_over:
 		emit_signal("state_changed")
 		return
-	if hand.size() >= max_hand_size:
-		feedback_key = "hand_full"
+	if not draft_enabled:
+		_draw_legacy_card()
+		return
+	if not _can_pay_cost(draft_reroll_cost):
+		feedback_key = "reroll_no_resources"
 		emit_signal("state_changed")
 		return
-	var card := deck_manager.draw_main_card()
-	if card.is_empty():
-		feedback_key = "deck_empty"
+	_pay_cost(draft_reroll_cost)
+	for slot_type in REQUIRED_SLOTS:
+		if business_model.get_card(slot_type).is_empty():
+			_generate_draft_options_for_slot(slot_type)
+	feedback_key = "reroll_options"
+	emit_signal("state_changed")
+
+
+func choose_draft_option(slot_type: String, card_id: String) -> void:
+	if game_over:
+		emit_signal("state_changed")
+		return
+	var options: Array = draft_options.get(slot_type, [])
+	var chosen := {}
+	for card in options:
+		if str(card.get("id", "")) == card_id:
+			chosen = card
+			break
+	if chosen.is_empty():
+		feedback_key = "draft_no_options"
+		emit_signal("state_changed")
+		return
+	var result := business_model.place_card(chosen, slot_type)
+	if bool(result.get("success", false)):
+		draft_options[slot_type] = []
+		selected_card_id = ""
+		feedback_key = "draft_complete" if business_model.missing_slots().is_empty() else "draft_option_chosen"
+		score_current_model(false)
 	else:
-		hand.append(card)
-		feedback_key = "card_drawn"
+		feedback_key = str(result.get("message_key", "invalid_placement"))
 	emit_signal("state_changed")
 
 
@@ -225,6 +262,52 @@ func _reset_survival() -> void:
 	stage_history = []
 	game_over = false
 	game_won = false
+	draft_options = {}
+
+
+func _generate_all_draft_options() -> void:
+	draft_options = {}
+	if not draft_enabled:
+		hand = deck_manager.draw_initial_hand(REQUIRED_SLOTS, initial_hand_size)
+		return
+	for slot_type in REQUIRED_SLOTS:
+		_generate_draft_options_for_slot(slot_type)
+
+
+func _generate_draft_options_for_slot(slot_type: String) -> void:
+	var options: Array = []
+	for _index in range(draft_options_per_slot):
+		var card := deck_manager.draw_main_card_by_type(slot_type)
+		if card.is_empty():
+			break
+		options.append(card)
+	draft_options[slot_type] = options
+
+
+func _draw_legacy_card() -> void:
+	if hand.size() >= max_hand_size:
+		feedback_key = "hand_full"
+		emit_signal("state_changed")
+		return
+	var card := deck_manager.draw_main_card()
+	if card.is_empty():
+		feedback_key = "deck_empty"
+	else:
+		hand.append(card)
+		feedback_key = "card_drawn"
+	emit_signal("state_changed")
+
+
+func _can_pay_cost(cost: Dictionary) -> bool:
+	for key in cost.keys():
+		if int(resources.get(str(key), 0)) < int(cost[key]):
+			return false
+	return true
+
+
+func _pay_cost(cost: Dictionary) -> void:
+	for key in cost.keys():
+		resources[str(key)] = int(resources.get(str(key), 0)) - int(cost[key])
 
 
 func _resolve_stage_economy() -> Dictionary:
@@ -330,6 +413,11 @@ func _load_rules() -> void:
 		return
 	initial_hand_size = int(parsed.get("initial_hand_size", DEFAULT_INITIAL_HAND_SIZE))
 	max_hand_size = int(parsed.get("max_hand_size", DEFAULT_MAX_HAND_SIZE))
+	var draft: Dictionary = parsed.get("draft", {})
+	draft_enabled = bool(draft.get("enabled", true))
+	draft_options_per_slot = int(draft.get("options_per_slot", DEFAULT_DRAFT_OPTIONS_PER_SLOT))
+	if typeof(draft.get("reroll_cost", {})) == TYPE_DICTIONARY:
+		draft_reroll_cost = draft["reroll_cost"].duplicate(true)
 	var survival: Dictionary = parsed.get("survival", {})
 	max_stage = int(survival.get("max_stage", DEFAULT_MAX_STAGE))
 	reward_choice_count = int(survival.get("reward_choice_count", DEFAULT_REWARD_CHOICE_COUNT))

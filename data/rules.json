@@ -5,6 +5,14 @@
   "card_types": ["customer", "pain", "solution", "product", "channel", "revenue", "cost", "moat", "risk", "event"],
   "initial_hand_size": 10,
   "max_hand_size": 16,
+  "draft": {
+    "enabled": true,
+    "options_per_slot": 3,
+    "reroll_cost": {
+      "funds": 8,
+      "time": 1
+    }
+  },
   "dimensions": [
     "demand_strength",
     "willingness_to_pay",

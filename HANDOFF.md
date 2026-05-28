@@ -2,7 +2,7 @@
 
 ## Current State
 
-The project is a bilingual Godot 4.x MVP with a V2 survival-mode increment. It has a configured main scene, data-driven cards, localization, game state, explainable scoring, dynamic risk/event pressure, generated summaries, Control-based UI, and a first roguelite-style stage loop.
+The project is a bilingual Godot 4.x MVP with survival and draft-mode increments. It has a configured main scene, data-driven cards, localization, game state, explainable scoring, dynamic risk/event pressure, generated summaries, Control-based UI, a roguelite-style stage loop, and board-slot draft choices.
 
 ## Completed Features
 
@@ -28,6 +28,8 @@ The project is a bilingual Godot 4.x MVP with a V2 survival-mode increment. It h
 - Reward selection.
 - Survival fail/clear state.
 - Godot smoke test at `tools/smoke_test.gd`.
+- Board draft mode: each core slot offers 3 candidate cards.
+- Paid reroll of empty-slot candidate options.
 
 ## How To Run
 
@@ -41,7 +43,7 @@ new game → select hand card → place into matching slot → fill core slots �
 
 Also test the V2 survival loop:
 
-fill slots → score → next stage → choose reward → next stage → survive/fail.
+choose slot draft options → fill slots → score → next stage → choose reward → next stage → survive/fail.
 
 ## Validation Performed
 
@@ -62,11 +64,13 @@ fill slots → score → next stage → choose reward → next stage → survive
 - UI layout is functional but not final-polished.
 - The scoring model is explainable and dynamic, but weights should be tuned after playtesting.
 - Survival resource economy is intentionally first-pass and needs tuning.
+- Draft reroll cost and candidate count need playtest tuning.
 
 ## Next Steps
 
 1. Open in Godot 4.x and run the main scene with a visible window.
 2. Playtest the full loop manually.
 3. Playtest survival pacing and adjust resource values in `data/rules.json`.
-4. Playtest scoring balance and adjust weights in `scripts/core/scoring_engine.gd` and dynamic effects in `scripts/core/risk_engine.gd`.
-5. Improve UI density and typography after runtime confirmation.
+4. Playtest draft pacing and adjust `data/rules.json` draft values.
+5. Playtest scoring balance and adjust weights in `scripts/core/scoring_engine.gd` and dynamic effects in `scripts/core/risk_engine.gd`.
+6. Improve UI density and typography after runtime confirmation.
