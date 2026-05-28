@@ -7,6 +7,7 @@ const BoardView = preload("res://scripts/ui/board_view.gd")
 const ScorePanel = preload("res://scripts/ui/score_panel.gd")
 const SummaryPanel = preload("res://scripts/ui/summary_panel.gd")
 const DetailPanel = preload("res://scripts/ui/detail_panel.gd")
+const BUILD_LABEL := "visible-board-v6"
 
 var localization: LocalizationManager
 var game_state: GameState
@@ -272,7 +273,7 @@ func _refresh_all() -> void:
 
 
 func _refresh_top_text() -> void:
-	title_label.text = localization.get_ui_text("game_title")
+	title_label.text = "%s  [%s]" % [localization.get_ui_text("game_title"), BUILD_LABEL]
 	new_game_button.text = localization.get_ui_text("new_game")
 	draw_card_button.text = localization.get_ui_text("draw_card")
 	draw_card_button.tooltip_text = "%s: %s %d | %s %d" % [

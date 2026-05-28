@@ -14,10 +14,12 @@ const KEY_STEP := 260
 
 var localization: LocalizationManager
 var title_label: Label
+var slot_jump: OptionButton
 var scroll_up_button: Button
 var scroll_down_button: Button
 var scroll: ScrollContainer
 var grid: GridContainer
+var slot_nodes := {}
 var drag_candidate := false
 var dragging := false
 var drag_start_mouse := Vector2.ZERO
@@ -41,10 +43,12 @@ func render(slots: Dictionary, draft_options: Dictionary, selected_card_type: St
 	_ensure_nodes()
 	title_label.text = localization.get_ui_text("board")
 	_update_scroll_button_text()
+	_update_slot_jump()
 	_clear_slots()
 	for slot_type in REQUIRED_SLOTS:
 		var slot: CardSlot = SLOT_SCENE.instantiate()
 		grid.add_child(slot)
+		slot_nodes[slot_type] = slot
 		slot.setup(slot_type, slots.get(slot_type, {}), draft_options.get(slot_type, []), localization, selected_card_type, type_colors)
 		slot.slot_clicked.connect(_on_slot_clicked)
 		slot.draft_option_clicked.connect(_on_draft_option_clicked)
@@ -122,6 +126,12 @@ func _ensure_nodes() -> void:
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_row.add_child(title_label)
 
+	slot_jump = OptionButton.new()
+	slot_jump.custom_minimum_size = Vector2(116, 30)
+	slot_jump.focus_mode = Control.FOCUS_NONE
+	slot_jump.item_selected.connect(_on_slot_jump_selected)
+	title_row.add_child(slot_jump)
+
 	scroll_up_button = _make_scroll_button("^")
 	scroll_up_button.pressed.connect(_scroll_by.bind(-KEY_STEP))
 	title_row.add_child(scroll_up_button)
@@ -148,6 +158,7 @@ func _ensure_nodes() -> void:
 
 
 func _clear_slots() -> void:
+	slot_nodes.clear()
 	for child in grid.get_children():
 		grid.remove_child(child)
 		child.queue_free()
@@ -173,6 +184,19 @@ func _on_slot_pan_started() -> void:
 
 func _on_slot_pan_dragged(delta: Vector2) -> void:
 	_scroll_by(-int(delta.y))
+
+
+func _on_slot_jump_selected(index: int) -> void:
+	if index < 0 or index >= REQUIRED_SLOTS.size():
+		return
+	jump_to_slot(REQUIRED_SLOTS[index])
+
+
+func jump_to_slot(slot_type: String) -> void:
+	if scroll == null or not slot_nodes.has(slot_type):
+		return
+	var slot: Control = slot_nodes[slot_type]
+	scroll.scroll_vertical = clampi(int(slot.position.y) - 4, 0, _max_vertical_scroll())
 
 
 func _scroll_by(amount: int) -> void:
@@ -213,6 +237,16 @@ func _update_scroll_button_text() -> void:
 		return
 	scroll_up_button.tooltip_text = localization.get_ui_text("scroll_up") if localization != null else ""
 	scroll_down_button.tooltip_text = localization.get_ui_text("scroll_down") if localization != null else ""
+
+
+func _update_slot_jump() -> void:
+	if slot_jump == null or localization == null:
+		return
+	slot_jump.clear()
+	slot_jump.tooltip_text = localization.get_ui_text("slot_jump")
+	for slot_type in REQUIRED_SLOTS:
+		slot_jump.add_item(localization.get_ui_text("type_" + slot_type))
+	slot_jump.select(-1)
 
 
 func _handle_board_pointer_input(event: InputEvent, use_global_position: bool) -> bool:

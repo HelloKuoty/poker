@@ -703,3 +703,46 @@
 ### Next Step
 
 - Commit, push, and launch a fresh visible Godot window using default project settings.
+
+## 2026-05-28 19:52:57 +08:00 - Visible Build Marker and Slot Jump
+
+### Completed Work
+
+- Added a visible `visible-board-v6` marker to the in-game title.
+- Added `visible-board-v6` to the Godot application/window title so old windows are easier to identify.
+- Added a localized business board slot jump dropdown with all 8 board slot types.
+- Added `BoardView.jump_to_slot(slot_type)` so tests and UI can navigate directly to any board slot without drag, wheel, or scrollbars.
+- Extended `tools/board_scroll_test.gd` to verify slot jump navigation reaches the lower board row.
+- Extended `tools/main_layout_test.gd` to verify the visible build marker and the 8-item slot jump dropdown exist.
+
+### Files Changed
+
+- `project.godot`
+- `data/ui_text.json`
+- `scripts/ui/main_controller.gd`
+- `scripts/ui/board_view.gd`
+- `tools/board_scroll_test.gd`
+- `tools/main_layout_test.gd`
+- `tools/project_config_test.gd`
+- `TODO.md`
+- `TEST_PLAN.md`
+- `ITERATION_LOG.md`
+
+### Validation Performed
+
+- JSON validation passed for `data/cards.json`, `data/ui_text.json`, and `data/rules.json`.
+- `godot4 --headless --path . --script tools/project_config_test.gd` passed with `PROJECT_CONFIG_TEST_OK viewport=900x700`.
+- `godot4 --headless --path . --script tools/main_layout_test.gd` passed from 1440x900 down to 640x480 with `visible_slots=8 clickable_slots=8`.
+- `godot4 --headless --path . --script tools/board_scroll_test.gd` passed with `BOARD_SCROLL_TEST_OK max_scroll=99 final_scroll=99`.
+- `godot4 --headless --path . --quit` passed.
+- `godot4 --headless --path . --quit-after 2` passed.
+- `godot4 --headless --path . --script tools/smoke_test.gd` passed with `SMOKE_TEST_OK stage=3 funds=91 trust=61 hand=2`.
+- `git diff --check` passed.
+
+### Known Issues
+
+- Already-open windows from older commits will not show the `visible-board-v6` marker and should be ignored or closed.
+
+### Next Step
+
+- Commit, push, and launch a fresh visible Godot window.

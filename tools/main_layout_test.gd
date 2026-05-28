@@ -48,6 +48,12 @@ func _check_layout(viewport_size: Vector2i) -> void:
 	var grid_rect: Rect2 = grid.get_global_rect()
 	var visible_count := 0
 	var clickable_count := 0
+	if not str(main.title_label.text).contains("visible-board-v6"):
+		_fail("Visible build label is missing at %s. title=%s" % [str(viewport_size), str(main.title_label.text)])
+		return
+	if board.slot_jump == null or board.slot_jump.item_count != 8:
+		_fail("Slot jump navigation is missing or incomplete at %s." % str(viewport_size))
+		return
 	for slot in grid.get_children():
 		var slot_rect: Rect2 = slot.get_global_rect()
 		if scroll_rect.encloses(slot_rect):

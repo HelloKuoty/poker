@@ -17,6 +17,7 @@
   "draft_no_options": {"zh": "当前没有可选候选。", "en": "No draft options are currently available."},
   "draft_complete": {"zh": "画布核心槽位已完成，可以评分并进入下一阶段。", "en": "Core board slots are complete. Score the model and advance to the next stage."},
   "board": {"zh": "业务画布", "en": "Business Board"},
+  "slot_jump": {"zh": "定位槽位", "en": "Jump to Slot"},
   "scroll_up": {"zh": "向上滚动画布", "en": "Scroll board up"},
   "scroll_down": {"zh": "向下滚动画布", "en": "Scroll board down"},
   "score": {"zh": "评分", "en": "Score"},

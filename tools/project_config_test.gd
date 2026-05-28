@@ -11,6 +11,11 @@ func _init() -> void:
 
 	var width := int(config.get_value("display", "window/size/viewport_width", 0))
 	var height := int(config.get_value("display", "window/size/viewport_height", 0))
+	var app_name := str(config.get_value("application", "config/name", ""))
+	if not app_name.contains("visible-board-v6"):
+		push_error("PROJECT_CONFIG_TEST_FAILED: visible build marker missing from app name")
+		quit(1)
+		return
 	if width <= 0 or height <= 0:
 		push_error("PROJECT_CONFIG_TEST_FAILED: invalid viewport size %dx%d" % [width, height])
 		quit(1)

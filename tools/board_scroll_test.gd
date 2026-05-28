@@ -150,6 +150,13 @@ func _run() -> void:
 		_fail("Slot drag forwarding cannot move board content.")
 		return
 
+	scroll.scroll_vertical = 0
+	board.jump_to_slot("moat")
+	await process_frame
+	if scroll.scroll_vertical <= 0:
+		_fail("Slot jump navigation cannot move to the lower board row.")
+		return
+
 	print("BOARD_SCROLL_TEST_OK max_scroll=%d final_scroll=%d" % [max_scroll, scroll.scroll_vertical])
 	quit(0)
 
