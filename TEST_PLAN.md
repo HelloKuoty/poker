@@ -7,9 +7,9 @@
 3. Run the main scene.
 4. Confirm the default language is Chinese.
 5. Click `新游戏`.
-6. Confirm `画布候选 / Board Draft Options` appears on the left.
-7. Confirm each empty core board slot offers up to 3 candidate cards.
-8. Click a draft candidate and confirm it is placed into the matching board slot.
+6. Confirm each empty core board slot directly shows up to 3 candidate cards.
+7. Confirm candidates are visually grouped inside their matching slot.
+8. Click a candidate inside a slot and confirm it is placed into that board slot.
 9. Confirm that slot's draft options disappear after choosing one.
 10. Click `重抽候选` and confirm empty-slot options refresh while funds/time decrease.
 11. Try rerolling with insufficient resources if possible; confirm invalid feedback appears.

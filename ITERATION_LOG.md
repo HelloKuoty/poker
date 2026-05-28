@@ -266,3 +266,67 @@
 ### Next Step
 
 - Playtest V3 draft choices visually and tune reroll cost.
+
+## 2026-05-28 18:53:38 +08:00 - In-Board Draft Options
+
+### Completed Work
+
+- Moved draft candidate choices directly into each business board slot.
+- Removed the separate left-side Draft Options tab.
+- Kept reward/hand cards as a smaller auxiliary panel on the right.
+- Increased slot size slightly to fit in-slot candidates.
+- Kept paid reroll behavior for empty-slot candidates.
+
+### Files Changed
+
+- `scripts/ui/card_slot.gd`
+- `scripts/ui/board_view.gd`
+- `scripts/ui/main_controller.gd`
+- `scenes/card_slot.tscn`
+- `scripts/ui/draft_view.gd`
+- `README.md`
+- `TEST_PLAN.md`
+- `TODO.md`
+- `HANDOFF.md`
+- `ITERATION_LOG.md`
+
+### Validation Performed
+
+- JSON validation passed for `data/cards.json`, `data/ui_text.json`, and `data/rules.json`.
+- `godot4 --headless --path . --quit` passed.
+- `godot4 --headless --path . --quit-after 2` passed.
+- `godot4 --headless --path . --script tools/smoke_test.gd` passed with `SMOKE_TEST_OK`.
+
+### Known Issues
+
+- In-slot candidate buttons are functional but need visual playtest for readability.
+- Right-side auxiliary panel may need density tuning after visible playtest.
+
+### Next Step
+
+- Open the visible game window and verify the board now feels simpler than the separated draft panel.
+
+## 2026-05-28 18:49:48 +08:00 - V3 Visible Launch
+
+### Completed Work
+
+- Updated `TODO.md` current goal for V3 visible manual testing.
+- Started the Godot project in a visible window.
+
+### Files Changed
+
+- `TODO.md`
+- `ITERATION_LOG.md`
+
+### Validation Performed
+
+- Confirmed local branch is synced with `origin/main`.
+- Launched `C:\Users\Jiang\AppData\Local\Microsoft\WinGet\Links\godot.exe --path .` from the project directory.
+
+### Known Issues
+
+- Manual V3 playtest result is not recorded yet.
+
+### Next Step
+
+- Test the board draft flow: choose slot options, reroll empty-slot options, score, advance stage, choose reward.

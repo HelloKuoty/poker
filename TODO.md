@@ -2,7 +2,7 @@
 
 ## Current Goal
 
-Implement V3 business-board draft mode: each board slot offers 3 options, and rerolling options costs resources.
+Move draft choices into each business board slot so every slot directly shows its 3 options.
 
 ## Completed This Iteration
 
@@ -23,7 +23,8 @@ Implement V3 business-board draft mode: each board slot offers 3 options, and re
 
 - Replace unlimited free draw as the main strategy.
 - Generate 3 candidate cards per business slot.
-- Let players place cards by choosing slot candidates.
+- Show candidate cards directly inside each empty business board slot.
+- Let players place cards by choosing in-slot candidates.
 - Make `Draw Card` act as paid reroll of current candidate options.
 - Keep reward choices and survival loop compatible.
 

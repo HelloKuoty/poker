@@ -3,7 +3,6 @@ extends Control
 const LocalizationManager = preload("res://scripts/core/localization_manager.gd")
 const GameState = preload("res://scripts/core/game_state.gd")
 const HandView = preload("res://scripts/ui/hand_view.gd")
-const DraftView = preload("res://scripts/ui/draft_view.gd")
 const BoardView = preload("res://scripts/ui/board_view.gd")
 const ScorePanel = preload("res://scripts/ui/score_panel.gd")
 const SummaryPanel = preload("res://scripts/ui/summary_panel.gd")
@@ -24,7 +23,6 @@ var restart_button: Button
 var language_button: Button
 
 var hand_view: HandView
-var draft_view: DraftView
 var board_view: BoardView
 var score_panel: ScorePanel
 var summary_panel: SummaryPanel
@@ -82,29 +80,13 @@ func _build_ui() -> void:
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	root.add_child(body)
 
-	var left_tabs := TabContainer.new()
-	left_tabs.custom_minimum_size = Vector2(340, 0)
-	left_tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	body.add_child(left_tabs)
-
-	draft_view = DraftView.new()
-	draft_view.name = "Draft"
-	draft_view.setup(localization)
-	draft_view.draft_option_clicked.connect(_on_draft_option_clicked)
-	left_tabs.add_child(draft_view)
-
-	hand_view = HandView.new()
-	hand_view.name = "Hand"
-	hand_view.setup(localization)
-	hand_view.card_clicked.connect(_on_hand_card_clicked)
-	left_tabs.add_child(hand_view)
-
 	board_view = BoardView.new()
-	board_view.custom_minimum_size = Vector2(560, 0)
+	board_view.custom_minimum_size = Vector2(760, 0)
 	board_view.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	board_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	board_view.setup(localization)
 	board_view.slot_clicked.connect(_on_slot_clicked)
+	board_view.draft_option_clicked.connect(_on_draft_option_clicked)
 	body.add_child(board_view)
 
 	var right_column := VBoxContainer.new()
@@ -114,6 +96,13 @@ func _build_ui() -> void:
 	body.add_child(right_column)
 
 	right_column.add_child(_build_survival_panel())
+
+	hand_view = HandView.new()
+	hand_view.custom_minimum_size = Vector2(0, 155)
+	hand_view.setup(localization)
+	hand_view.card_clicked.connect(_on_hand_card_clicked)
+	right_column.add_child(hand_view)
+
 	right_column.add_child(_build_pressure_panel())
 
 	score_panel = ScorePanel.new()
@@ -245,9 +234,8 @@ func _refresh_all() -> void:
 	_refresh_top_text()
 	var selected_card: Dictionary = game_state.get_selected_card()
 	var selected_type := str(selected_card.get("type", ""))
-	draft_view.render(game_state.draft_options, localization, type_colors)
 	hand_view.render(game_state.hand, game_state.selected_card_id, localization, type_colors)
-	board_view.render(game_state.business_model.get_slots(), selected_type, localization, type_colors)
+	board_view.render(game_state.business_model.get_slots(), game_state.draft_options, selected_type, localization, type_colors)
 	score_panel.render(game_state.score_result, localization)
 	summary_panel.render(game_state.summary_result, localization)
 	detail_panel.render(selected_card, localization)

@@ -5,6 +5,7 @@ const LocalizationManager = preload("res://scripts/core/localization_manager.gd"
 const CardSlot = preload("res://scripts/ui/card_slot.gd")
 
 signal slot_clicked(slot_type: String)
+signal draft_option_clicked(slot_type: String, card_id: String)
 
 const SLOT_SCENE := preload("res://scenes/card_slot.tscn")
 const REQUIRED_SLOTS := ["customer", "pain", "solution", "product", "channel", "revenue", "cost", "moat"]
@@ -19,7 +20,7 @@ func setup(loc: LocalizationManager) -> void:
 	_ensure_nodes()
 
 
-func render(slots: Dictionary, selected_card_type: String, loc: LocalizationManager, type_colors: Dictionary) -> void:
+func render(slots: Dictionary, draft_options: Dictionary, selected_card_type: String, loc: LocalizationManager, type_colors: Dictionary) -> void:
 	localization = loc
 	_ensure_nodes()
 	title_label.text = localization.get_ui_text("board")
@@ -27,8 +28,9 @@ func render(slots: Dictionary, selected_card_type: String, loc: LocalizationMana
 	for slot_type in REQUIRED_SLOTS:
 		var slot: CardSlot = SLOT_SCENE.instantiate()
 		grid.add_child(slot)
-		slot.setup(slot_type, slots.get(slot_type, {}), localization, selected_card_type, type_colors)
+		slot.setup(slot_type, slots.get(slot_type, {}), draft_options.get(slot_type, []), localization, selected_card_type, type_colors)
 		slot.slot_clicked.connect(_on_slot_clicked)
+		slot.draft_option_clicked.connect(_on_draft_option_clicked)
 
 
 func _ensure_nodes() -> void:
@@ -77,3 +79,7 @@ func _clear_slots() -> void:
 
 func _on_slot_clicked(slot_type: String) -> void:
 	emit_signal("slot_clicked", slot_type)
+
+
+func _on_draft_option_clicked(slot_type: String, card_id: String) -> void:
+	emit_signal("draft_option_clicked", slot_type, card_id)

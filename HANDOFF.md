@@ -28,7 +28,7 @@ The project is a bilingual Godot 4.x MVP with survival and draft-mode increments
 - Reward selection.
 - Survival fail/clear state.
 - Godot smoke test at `tools/smoke_test.gd`.
-- Board draft mode: each core slot offers 3 candidate cards.
+- Board draft mode: each empty core slot shows 3 candidate cards directly inside the board.
 - Paid reroll of empty-slot candidate options.
 
 ## How To Run
@@ -64,7 +64,7 @@ choose slot draft options → fill slots → score → next stage → choose rew
 - UI layout is functional but not final-polished.
 - The scoring model is explainable and dynamic, but weights should be tuned after playtesting.
 - Survival resource economy is intentionally first-pass and needs tuning.
-- Draft reroll cost and candidate count need playtest tuning.
+- Draft reroll cost, candidate count, and in-slot candidate readability need playtest tuning.
 
 ## Next Steps
 

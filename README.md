@@ -24,8 +24,8 @@ godot4 --headless --path . --script tools/smoke_test.gd
 ## Gameplay Overview
 
 - Click `新游戏 / New Game` to reset the run.
-- The left `Board Draft Options` tab shows 3 candidate cards for each empty board slot.
-- Click a draft candidate to place it directly into that slot.
+- Each empty business board slot directly shows 3 candidate cards.
+- Click a candidate inside a slot to place it directly into that slot.
 - `重抽候选 / Reroll Options` refreshes options for empty slots and costs funds/time.
 - Reward cards still enter the hand; click a hand card to select it.
 - Click the matching board slot to place it.
@@ -52,7 +52,7 @@ The run ends when funds, time, or trust reaches zero. Survive all configured sta
 
 V3 changes the main decision from unlimited drawing to board-slot drafting:
 
-- each core board slot offers 3 options
+- each core board slot shows 3 options inside the board
 - choosing an option places it into that slot
 - rerolling options costs resources
 - the player must build the best model from limited choices instead of drawing forever
