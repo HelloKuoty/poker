@@ -2,7 +2,7 @@
 
 ## Current Goal
 
-Fix board overflow by making the business board scrollable when in-slot draft options exceed the viewport.
+Fix business board navigation by adding visible scrollbars and mouse-drag panning.
 
 ## Completed This Iteration
 

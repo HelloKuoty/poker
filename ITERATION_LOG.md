@@ -360,6 +360,36 @@
 
 - Run Godot CLI validation and relaunch the visible window.
 
+## 2026-05-28 19:08:59 +08:00 - Board Drag Panning
+
+### Completed Work
+
+- Added mouse-drag panning for the business board.
+- Forced the board's vertical scrollbar to stay visible.
+- Kept horizontal scrolling disabled for a stable two-column board layout.
+- Ensured the board's root container expands inside its panel.
+
+### Files Changed
+
+- `scripts/ui/board_view.gd`
+- `TODO.md`
+- `ITERATION_LOG.md`
+
+### Validation Performed
+
+- JSON validation passed for `data/cards.json`, `data/ui_text.json`, and `data/rules.json`.
+- `godot4 --headless --path . --quit` passed.
+- `godot4 --headless --path . --quit-after 2` passed.
+- `godot4 --headless --path . --script tools/smoke_test.gd` passed with `SMOKE_TEST_OK`.
+
+### Known Issues
+
+- Need visible manual check to confirm drag behavior over candidate buttons and empty board areas.
+
+### Next Step
+
+- Run Godot CLI validation, push the fix, and relaunch the visible window.
+
 ## 2026-05-28 18:49:48 +08:00 - V3 Visible Launch
 
 ### Completed Work

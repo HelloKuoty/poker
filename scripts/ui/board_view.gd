@@ -14,6 +14,11 @@ var localization: LocalizationManager
 var title_label: Label
 var scroll: ScrollContainer
 var grid: GridContainer
+var drag_candidate := false
+var dragging := false
+var drag_start_mouse := Vector2.ZERO
+var drag_start_vertical := 0
+var drag_start_horizontal := 0
 
 
 func setup(loc: LocalizationManager) -> void:
@@ -32,6 +37,31 @@ func render(slots: Dictionary, draft_options: Dictionary, selected_card_type: St
 		slot.setup(slot_type, slots.get(slot_type, {}), draft_options.get(slot_type, []), localization, selected_card_type, type_colors)
 		slot.slot_clicked.connect(_on_slot_clicked)
 		slot.draft_option_clicked.connect(_on_draft_option_clicked)
+
+
+func _input(event: InputEvent) -> void:
+	if scroll == null:
+		return
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed and _is_mouse_over_board():
+			drag_candidate = true
+			dragging = false
+			drag_start_mouse = get_viewport().get_mouse_position()
+			drag_start_vertical = scroll.scroll_vertical
+			drag_start_horizontal = scroll.scroll_horizontal
+		elif drag_candidate:
+			if dragging:
+				get_viewport().set_input_as_handled()
+			drag_candidate = false
+			dragging = false
+	if event is InputEventMouseMotion and drag_candidate:
+		var current_mouse := get_viewport().get_mouse_position()
+		var delta := current_mouse - drag_start_mouse
+		if dragging or abs(delta.y) > 6.0 or abs(delta.x) > 6.0:
+			dragging = true
+			scroll.scroll_vertical = max(0, drag_start_vertical - int(delta.y))
+			scroll.scroll_horizontal = max(0, drag_start_horizontal - int(delta.x))
+			get_viewport().set_input_as_handled()
 
 
 func _ensure_nodes() -> void:
@@ -56,6 +86,8 @@ func _ensure_nodes() -> void:
 
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 10)
+	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	root.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	margin.add_child(root)
 
 	title_label = Label.new()
@@ -67,6 +99,8 @@ func _ensure_nodes() -> void:
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
+	scroll.follow_focus = true
 	root.add_child(scroll)
 
 	grid = GridContainer.new()
@@ -89,3 +123,9 @@ func _on_slot_clicked(slot_type: String) -> void:
 
 func _on_draft_option_clicked(slot_type: String, card_id: String) -> void:
 	emit_signal("draft_option_clicked", slot_type, card_id)
+
+
+func _is_mouse_over_board() -> bool:
+	var mouse_position := get_viewport().get_mouse_position()
+	var rect := Rect2(global_position, size)
+	return rect.has_point(mouse_position)
